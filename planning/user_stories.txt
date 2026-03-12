@@ -1,0 +1,20 @@
+parents
+1. I want to be able to find a babysitter when I am busy by comparing their available time, distance and price.
+2. I want to be able to see the profile of a babysitter before I make the reservation.
+3. I want to be able to register both as a parent and a babysitter at the same time.
+4. I want to be able to have the right to rate and make complains about the service.
+5. I want to be able to have someone to handle anything that is not expected, like IT problems.
+6. I want to be able to post my own requirements for landing a babysitter in the future.
+
+babysitters
+1. I want to be able to register as a babysitter with a certificate and other essencial information, such as name, age, available time, service area and contact.
+2. I want to be able to display a self-introduction showing my advantages for long time 
+
+IT support staff
+
+
+Administrators for reviewing
+
+
+
+Complains handle staff
