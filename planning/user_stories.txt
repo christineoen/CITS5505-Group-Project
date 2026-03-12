@@ -5,13 +5,26 @@ parents
 4. I want to be able to have the right to rate and make complains about the service.
 5. I want to be able to have someone to handle anything that is not expected, like IT problems.
 6. I want to be able to post my own requirements for landing a babysitter in the future.
+7. As a parent, I want to input my location so that nearby babysitters can find my location
+8. As a parent, I want to enter information about my children so that babysitters who have experience with their age group and special needs can make a decision as to whether they are a good fit
+9. As a parent, I want to see a map of nearby available babysitters so that I can see who is available in my area
+10. As a parent, I want to see a bio of each babysitter so that I can see what experience and credentials each babysitter has
+11. As a parent, I want to be able to send a message to babysitters so that we can see if we are a good fit
+12. As a parent, I want to be able to book a babysitter for a particular time slot so that I have confirmation that I will have care for that time
+13. As a parent, I want to leave a review of a babysitter after a booking so that other parents have more information to go on
 
 babysitters
 1. I want to be able to register as a babysitter with a certificate and other essencial information, such as name, age, available time, service area and contact.
-2. I want to be able to display a self-introduction showing my advantages for long time 
+2. I want to be able to display a self-introduction showing my advantages for long time
+3. As a babysitter, I want to input my photo, credentials, and references so parents can feel confident about choosing me as their carer
+4. As a babysitter, I want to see information about the families so that I can care for children who have ages and needs that I am capabale of handling
+5. As a babysitter, I want to see families in my area that need care so that I don't have to travel a long way to take care of the kids
+6. As a babysitter, I want to be able to message with parents to make sure we are on the same page about care
+7. As a babysitter, I want to be able to confirm dates/times of babysitting jobs so that it is clear when I am supposed to show up for work
+8. As a babysitter, I want parents to review me so that I can build up my profile to get more babysitting jobs
 
 IT support staff
-
+1. As an IT admin, I want to see a list of all parents and babysitters who have signed up for the service
 
 Administrators for reviewing
 
