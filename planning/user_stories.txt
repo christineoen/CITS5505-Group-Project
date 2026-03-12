@@ -1,0 +1,17 @@
+Parent user stories:
+As a parent, I want to input my location so that nearby babysitters can find my location
+As a parent, I want to enter information about my children so that babysitters who have experience with their age group and special needs can make a decision as to whether they are a good fit
+As a parent, I want to see a map of nearby available babysitters so that I can see who is available in my area
+As a parent, I want to see a bio of each babysitter so that I can see what experience and credentials each babysitter has
+As a parent, I want to be able to send a message to babysitters so that we can see if we are a good fit
+As a parent, I want to be able to book a babysitter for a particular time slot so that I have confirmation that I will have care for that time
+As a parent, I want to leave a review of a babysitter after a booking so that other parents have more information to go on
+
+As a babysitter, I want to input my photo, credentials, and references so parents can feel confident about choosing me as their carer
+As a babysitter, I want to see information about the families so that I can care for children who have ages and needs that I am capabale of handling
+As a babysitter, I want to see families in my area that need care so that I don't have to travel a long way to take care of the kids
+As a babysitter, I want to be able to message with parents to make sure we are on the same page about care
+As a babysitter, I want to be able to confirm dates/times of babysitting jobs so that it is clear when I am supposed to show up for work
+As a babysitter, I want parents to review me so that I can build up my profile to get more babysitting jobs
+
+As an IT admin, I want to see a list of all parents and babysitters who have signed up for the service
