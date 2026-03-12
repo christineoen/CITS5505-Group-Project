@@ -1,0 +1,11 @@
+As a parent, I want to search for babysitters by location,
+ so that I can find someone near my home.
+
+As a babysitter, I want to receive notifications for 
+new booking requests, so that I can respond in time.
+
+As a babysitter, I want to set my freetime, so that I can plan my time 
+
+
+ As an admin, I want to verify babysitter profiles, 
+ so that only qualified care are shown on the platform.
