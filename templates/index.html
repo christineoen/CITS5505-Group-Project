@@ -2,31 +2,9 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h1>Welcome to My Flask App</h1>
-
-<h2>Registered Users</h2>
-{% if users %}
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Joined</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user['id'] }}</td>
-                <td>{{ user['username'] }}</td>
-                <td>{{ user['email'] }}</td>
-                <td>{{ user['created_at'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No users yet. <a href="{{ url_for('auth.register') }}">Be the first to register!</a></p>
-{% endif %}
+<div class="py-5 text-center">
+    <h1 class="display-5 fw-bold">Welcome to My Flask App</h1>
+    <p class="lead text-muted">A simple Flask application to get you started.</p>
+    <a href="{{ url_for('main.about') }}" class="btn btn-primary mt-3">Learn More</a>
+</div>
 {% endblock %}
