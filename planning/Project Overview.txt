@@ -47,7 +47,7 @@ As a parent:
 8. I want to enter information about my children so that babysitters who have experience with their age group and special needs can make a decision as to whether they are a good fit
 9. I want to see a map of nearby available babysitters so that I can see who is available in my area.
 10.I want to see a bio of each babysitter so that I can see what experience and credentials each babysitter has.
-11.I want to be able to send a message to babysitters so that we can see if we are a good fit.
+// 11.I want to be able to send a message to babysitters so that we can see if we are a good fit.
 12.I want to be able to book a babysitter for a particular time slot so that I have confirmation that I will have care for that time.
 13.I want to leave a review of a babysitter after a booking so that other parents have more information to go on.
 
@@ -59,7 +59,7 @@ As a babysitter:
 5.I want to see families in my area that need care so that I don't have to travel a long way to take care of the kids.
 6.I want to be able to message with parents to make sure we are on the same page about care.
 7.I want to be able to confirm dates/times of babysitting jobs so that it is clear when I am supposed to show up for work.
-8.I want parents to review me so that I can build up my profile to get more babysitting jobs
+8.I want parents to review me so that I can build up my profile to get more babysitting jobs.
 9.I want to receive notifications for new booking requests, so that I can respond in time.
 10.I want to set my freetime, so that I can plan my time.
 
@@ -89,7 +89,7 @@ As an complains handle administrator:
 - Creating and editting babysitter/parents profile
 - Browse and search for babysitters/parents with a calendar and map if it's possible
 - Booking request system  
-- Message box for real-time chatting and saving chatting history
+- Message box for showing notifications
 - Reviewing, rating system
 - Submitting complains
 
@@ -107,6 +107,7 @@ Register → Create profile → Receive request → Accept / Reject
 ---
 
 
+//
 ## Project Scope
 Advanced features such as:
 - Online payment  
