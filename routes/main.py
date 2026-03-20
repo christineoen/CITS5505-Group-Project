@@ -9,3 +9,11 @@ def index():
 @main_bp.route("/about")
 def about():
     return render_template("about.html")
+
+@main_bp.route("/booking")
+def booking():
+    return render_template("booking.html")
+
+@main_bp.route("/messages")
+def messages():
+    return render_template("messages.html")
