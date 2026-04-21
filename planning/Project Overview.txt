@@ -1,63 +1,113 @@
 ## Project Overview
-SitBuddy is a web application that connects parents with babysitters.  
-The goal of this platform is to help parents find reliable babysitters in their local area and allow babysitters to showcase their experience and receive job opportunities.
+SitBuddy is a web application that connects parents with babysitters.
+
+The goal of this application is to :
+1.help parents find reliable babysitters in their local area,
+2.allow babysitters to showcase their experience and receive job opportunities.
 
 ---
 
+
 ## Target Users
-- **Parents / Families**
+- **Parents**
   - Looking for babysitters
-  - Want safe and trustworthy childcare
+  - Requiring safe and trustworthy childcare
 
 - **Babysitters**
   - Looking for job opportunities
-  - Want to present their skills and experience
+  - Working with their skills and experiences
 
 ---
+
+
+## Team Notes
+This document is a draft for discussion and planning.  
+The project design and features may be updated as the team progresses.
+
+---
+
 
 ## Problem Statement
-Parents often find it difficult to quickly identify and trust suitable babysitters.  
-At the same time, babysitters may not have a simple way to connect with families.
+Parents often find it difficult to quickly identify and find trustworthy babysitters.  
+At the same time, babysitters may not have a easy way to connect with employers.
 
 ---
 
-## Proposed Solution
-SitBuddy provides a simple platform where:
-- Parents can browse and compare babysitters
-- Babysitters can create profiles
-- Users can connect through booking requests
+
+## Proposed interactions (User stories)
+
+As a parent:
+1. I want to be able to find a babysitter when I am busy by comparing their available time, distance and price.
+2. I want to be able to see the profile of a babysitter before I make the reservation.
+3. I want to be able to register both as a parent and a babysitter at the same time.
+4. I want to be able to have the right to rate and make complains about the service.
+5. I want to be able to have someone to handle anything that is not expected, like IT problems.
+6. I want to be able to post my own requirements for landing a babysitter in the future.
+7. I want to search for babysitters by location,so that I can find someone near my home.
+8. I want to enter information about my children so that babysitters who have experience with their age group and special needs can make a decision as to whether they are a good fit
+9. I want to see a map of nearby available babysitters so that I can see who is available in my area.
+10.I want to see a bio of each babysitter so that I can see what experience and credentials each babysitter has.
+// 11.I want to be able to send a message to babysitters so that we can see if we are a good fit.
+12.I want to be able to book a babysitter for a particular time slot so that I have confirmation that I will have care for that time.
+13.I want to leave a review of a babysitter after a booking so that other parents have more information to go on.
+
+As a babysitter:
+1.I want to be able to register as a babysitter with a certificate and other essencial information, such as name, age, available time, service area and contact.
+2.I want to be able to display a self-introduction card showing my advantages for long time.
+3.I want to input my photo, credentials, and references so parents can feel confident about choosing me as their carer.
+4.I want to see information about the families so that I can care for children who have ages and needs that I am capabale of handling.
+5.I want to see families in my area that need care so that I don't have to travel a long way to take care of the kids.
+6.I want to be able to message with parents to make sure we are on the same page about care.
+7.I want to be able to confirm dates/times of babysitting jobs so that it is clear when I am supposed to show up for work.
+8.I want parents to review me so that I can build up my profile to get more babysitting jobs.
+9.I want to receive notifications for new booking requests, so that I can respond in time.
+10.I want to set my freetime, so that I can plan my time.
+
+As an IT support staff:
+1.I want to see a list of all parents and babysitters who have signed up for the service.
+
+As an complains handle administrator:
+1.I want to verify babysitter profiles so that only qualified care are shown on the platform.
+2.I want to handle complains from and between web users.
 
 ---
 
-## Core Features (Draft)
+
+## Main Pages
+- Home page (with welcome slogan and application introduction)
+- Sign up page 
+- Login page 
+- Booking page (with a searching bar, calendar and all user profiles)
+- Message page 
+- Current User Profile page
+  
+---
+
+
+## Core Features/Functions
 - User registration and login  
-- Babysitter profile creation  
-- Browse and search babysitters  
+- Creating and editting babysitter/parents profile
+- Browse and search for babysitters/parents with a calendar and map if it's possible
 - Booking request system  
-- Review and rating system  
+- Message box for showing notifications
+- Reviewing, rating system
+- Submitting complains
 
 ---
+
 
 ## User Flow
 
-### Parent
+-Parent
 Register → Browse → View profile → Send request → Leave review  
 
-### Babysitter
+-Babysitter
 Register → Create profile → Receive request → Accept / Reject  
 
 ---
 
-## Pages (Draft)
-- Home page  
-- Login / Register  
-- Babysitter list page  
-- Babysitter detail page  
-- Profile page  
-- Booking page  
 
----
-
+//
 ## Project Scope
 Advanced features such as:
 - Online payment  
@@ -65,7 +115,3 @@ Advanced features such as:
 - AI recommendations  
 
 ---
-
-## Team Notes
-This document is a draft for discussion and planning.  
-The project design and features may be updated as the team progresses.
