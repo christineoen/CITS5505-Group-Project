@@ -39,6 +39,18 @@ The app will be available at http://127.0.0.1:5000.
 
 ---
 
+## Seeding the Database
+
+To populate the database with 10 sample babysitters and 10 sample parents:
+
+```bash
+python seed.py
+```
+
+All seed accounts use the password `password123`. Re-running the script is safe — existing accounts are skipped.
+
+---
+
 ## Running the Tests
 
 ```bash
