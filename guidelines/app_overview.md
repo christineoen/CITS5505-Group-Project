@@ -65,7 +65,3 @@ Advanced features such as:
 - AI recommendations  
 
 ---
-
-## Team Notes
-This document is a draft for discussion and planning.  
-The project design and features may be updated as the team progresses.
