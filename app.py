@@ -21,7 +21,9 @@ def create_app():
         return db.session.get(User, int(user_id))
 
     from routes.main import main_bp
+    from routes.auth import auth_bp
     app.register_blueprint(main_bp)
+    app.register_blueprint(auth_bp)
 
     with app.app_context():
         db.create_all()
