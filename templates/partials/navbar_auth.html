@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-2">
+    <div class="container d-flex align-items-center">
+
+        <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">SitBuddy</a>
+
+        <ul class="navbar-nav mx-auto gap-4">
+            <li class="nav-item">
+                <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'main.index' }}"
+                   href="{{ url_for('main.index') }}">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'main.booking' }}"
+                   href="{{ url_for('main.booking') }}">Booking</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'main.messages' }}"
+                   href="{{ url_for('main.messages') }}">Messages</a>
+            </li>
+        </ul>
+
+        <div class="dropdown">
+            <button class="btn p-0 border-0 bg-transparent dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                <div class="avatar-circle bg-primary border border-white"
+                     style="width:42px;height:42px;font-size:1.1rem;">
+                    {{ current_user.username[0].upper() }}
+                </div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><span class="dropdown-item-text text-muted small">{{ current_user.username }}</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+            </ul>
+        </div>
+
+    </div>
+</nav>
