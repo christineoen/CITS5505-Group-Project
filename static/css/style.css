@@ -1,1 +1,17 @@
-/* Custom styles go here */
+/* ── Navigation ── */
+.navbar .dropdown-toggle::after {
+    display: none;
+}
+
+/* ── Avatar circle ── */
+.avatar-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+}

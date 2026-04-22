@@ -1,0 +1,12 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-2">
+    <div class="container d-flex align-items-center">
+
+        <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">SitBuddy</a>
+
+        <div class="ms-auto d-flex gap-2">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm fw-semibold">Log In</a>
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-sm fw-semibold text-primary">Sign Up</a>
+        </div>
+
+    </div>
+</nav>

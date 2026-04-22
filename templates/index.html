@@ -1,10 +1,137 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Home – SitBuddy{% endblock %}
 
 {% block content %}
+
+{% if not current_user.is_authenticated %}
 <div class="py-5 text-center">
-    <h1 class="display-5 fw-bold">SitBuddy</h1>
-    <p class="lead text-muted">A matching service for parents and babysitters.</p>
-    <a href="{{ url_for('main.about') }}" class="btn btn-primary mt-3">Learn More</a>
+    <h1 class="display-5 fw-bold">Find trusted care, fast.</h1>
+    <p class="lead text-muted mt-3 mb-4">SitBuddy connects Perth parents with experienced local babysitters.</p>
+    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg me-2">Get Started</a>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">Log In</a>
 </div>
+
+{% else %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">
+            {% if mode == 'babysitters' %}Browse Babysitters{% else %}Browse Parents{% endif %}
+        </h2>
+        <p class="text-muted mb-0 mt-1">
+            <span id="results-count">{{ profiles|length }}</span> result{{ 's' if profiles|length != 1 else '' }}
+        </p>
+    </div>
+</div>
+
+{# Filter bar #}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label fw-semibold mb-1">Location</label>
+                <select id="filter-location" class="form-select">
+                    <option value="">All locations</option>
+                    {% for loc in locations %}
+                    <option value="{{ loc }}">{{ postcode_suburb.get(loc, loc) }} ({{ loc }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if mode == 'babysitters' %}
+            <div class="col-sm-12 col-lg-7">
+                <label class="form-label fw-semibold mb-1">Available on</label>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for day in days %}
+                    <div class="form-check form-check-inline me-0">
+                        <input class="form-check-input day-filter" type="checkbox" value="{{ day }}" id="day-{{ day }}">
+                        <label class="form-check-label" for="day-{{ day }}">{{ day }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col-sm-6 col-lg-2 ms-auto">
+                <button id="clear-filters" class="btn btn-outline-secondary w-100">Clear</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# Cards grid #}
+<div class="row g-4" id="cards-grid">
+    {% set avatar_colors = ['primary', 'success', 'danger', 'warning', 'info', 'secondary'] %}
+    {% for p in profiles %}
+    <div class="col-sm-6 col-lg-4 card-col"
+         data-location="{{ p.location }}"
+         {% if mode == 'babysitters' %}data-days="{{ p.days | join(',') }}"{% endif %}>
+
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center px-4 pt-4 pb-2">
+
+                <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} mx-auto mb-3">
+                    {{ p.username[0].upper() }}
+                </div>
+
+                <h5 class="card-title mb-1 fw-semibold">{{ p.username }}</h5>
+                <p class="text-muted small mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
+                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                    </svg>
+                    {{ p.suburb }} {{ p.location }}
+                </p>
+
+                {% if mode == 'babysitters' %}
+                <div class="d-flex justify-content-center gap-2 mb-3 flex-wrap">
+                    <span class="badge bg-primary">${{ "%.0f"|format(p.hourly_rate) }}/hr</span>
+                    <span class="badge bg-secondary">{{ p.experience_years }} yr{{ 's' if p.experience_years != 1 else '' }} exp</span>
+                </div>
+                <div class="d-flex justify-content-center flex-wrap gap-1 mb-3">
+                    {% for day in p.days %}
+                    <span class="badge rounded-pill border text-secondary bg-light">{{ day }}</span>
+                    {% endfor %}
+                </div>
+                {% if p.bio %}
+                <p class="card-text text-muted small text-start">
+                    {{ p.bio[:100] }}{% if p.bio|length > 100 %}…{% endif %}
+                </p>
+                {% endif %}
+
+                {% else %}
+                <div class="mb-3">
+                    <span class="badge bg-info text-dark">
+                        {{ p.num_children }} child{{ 'ren' if p.num_children != 1 else '' }}
+                    </span>
+                </div>
+                {% if p.special_requirements %}
+                <p class="card-text text-muted small text-start">
+                    {{ p.special_requirements[:100] }}{% if p.special_requirements|length > 100 %}…{% endif %}
+                </p>
+                {% endif %}
+                {% endif %}
+
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-3">
+                <a href="#" class="btn btn-primary btn-sm px-4">View Profile</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{# Empty state #}
+<div id="no-results" class="text-center py-5 d-none">
+    <p class="text-muted fs-5">No results match your filters.</p>
+    <button id="clear-filters-empty" class="btn btn-outline-primary">Clear filters</button>
+</div>
+
+{% endif %}
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}
