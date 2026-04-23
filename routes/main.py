@@ -64,3 +64,13 @@ def booking(babysitter_id):
 @login_required
 def messages():
     return render_template("messages.html")
+
+@main_bp.route("/babysitter/<int:profile_id>")
+@login_required
+def babysitter_profile(profile_id):
+    return render_template("babysitter_profile.html")
+
+@main_bp.route("/parent/<int:profile_id>")
+@login_required
+def parent_profile(profile_id):
+    return render_template("parent_profile.html")
