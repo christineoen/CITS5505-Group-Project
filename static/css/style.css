@@ -15,3 +15,36 @@
     font-size: 1.5rem;
     font-weight: 600;
 }
+
+/* ── Messages Page ── */
+.conversation-item {
+    transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+    background-color: #f8f9fa !important;
+}
+
+#messages-container {
+    background-color: #fafafa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+#messages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messages-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#messages-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+#messages-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
