@@ -1,16 +1,16 @@
-// 全局变量
+// Global variables
 let currentBookingId = null;
 let currentOtherUserId = null;
 let currentBookingStatus = null;
 
-// 页面加载时获取对话列表
+// Load conversation list when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadConversations();
-    // 每30秒刷新一次对话列表
+    // Refresh conversation list every 30 seconds
     setInterval(loadConversations, 30000);
 });
 
-// 加载对话列表
+// Load conversation list
 async function loadConversations() {
     try {
         const response = await fetch('/messages/api/conversations');
@@ -71,7 +71,7 @@ async function loadConversations() {
     }
 }
 
-// 加载特定对话
+// Load specific conversation
 async function loadConversation(bookingId) {
     currentBookingId = bookingId;
     
@@ -82,11 +82,11 @@ async function loadConversation(bookingId) {
         currentOtherUserId = data.other_user.id;
         currentBookingStatus = data.booking.status;
         
-        // 显示对话视图
+        // Show conversation view
         document.getElementById('no-conversation-selected').classList.add('d-none');
         document.getElementById('conversation-view').classList.remove('d-none');
         
-        // 更新头部信息
+        // Update header info
         document.getElementById('other-user-initial').textContent = data.other_user.username[0].toUpperCase();
         document.getElementById('other-user-name').textContent = data.other_user.username;
         document.getElementById('booking-info').textContent = `${data.booking.date} ${data.booking.time}`;
@@ -95,20 +95,19 @@ async function loadConversation(bookingId) {
         statusBadge.textContent = data.booking.status;
         statusBadge.className = `badge ${getStatusColor(data.booking.status)}`;
         
-        // 显示接受/拒绝按钮（仅当状态为pending且当前用户是babysitter时）
+        // Show accept/reject buttons (only when status is pending and current user is babysitter)
         const bookingActions = document.getElementById('booking-actions');
         if (data.booking.status === 'pending') {
-            // 这里需要判断当前用户是否是babysitter
-            // 由于我们在后端已经验证，这里简单显示按钮
+            // Since we already verify on backend, simply show buttons here
             bookingActions.classList.remove('d-none');
         } else {
             bookingActions.classList.add('d-none');
         }
         
-        // 显示消息
+        // Display messages
         displayMessages(data.messages);
         
-        // 刷新对话列表以更新未读计数
+        // Refresh conversation list to update unread count
         loadConversations();
         
     } catch (error) {
@@ -117,7 +116,7 @@ async function loadConversation(bookingId) {
     }
 }
 
-// 显示消息列表
+// Display message list
 function displayMessages(messages) {
     const container = document.getElementById('messages-container');
     
@@ -147,11 +146,11 @@ function displayMessages(messages) {
         `;
     }).join('');
     
-    // 滚动到底部
+    // Scroll to bottom
     container.scrollTop = container.scrollHeight;
 }
 
-// 发送消息
+// Send message
 document.getElementById('send-message-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -174,7 +173,7 @@ document.getElementById('send-message-form').addEventListener('submit', async fu
         
         if (response.ok) {
             input.value = '';
-            // 重新加载对话
+            // Reload conversation
             loadConversation(currentBookingId);
         } else {
             alert('Failed to send message');
@@ -185,7 +184,7 @@ document.getElementById('send-message-form').addEventListener('submit', async fu
     }
 });
 
-// 更新booking状态
+// Update booking status
 async function updateBookingStatus(status) {
     if (!currentBookingId) return;
     
@@ -203,7 +202,7 @@ async function updateBookingStatus(status) {
         });
         
         if (response.ok) {
-            // 重新加载对话
+            // Reload conversation
             loadConversation(currentBookingId);
             loadConversations();
         } else {
@@ -215,7 +214,7 @@ async function updateBookingStatus(status) {
     }
 }
 
-// 工具函数：格式化时间
+// Utility function: Format time
 function formatTimeAgo(date) {
     const now = new Date();
     const diffMs = now - date;
@@ -231,7 +230,7 @@ function formatTimeAgo(date) {
     return date.toLocaleDateString();
 }
 
-// 工具函数：获取状态颜色
+// Utility function: Get status color
 function getStatusColor(status) {
     const colors = {
         'pending': 'bg-warning',
@@ -242,7 +241,7 @@ function getStatusColor(status) {
     return colors[status] || 'bg-secondary';
 }
 
-// 工具函数：转义HTML
+// Utility function: Escape HTML
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;

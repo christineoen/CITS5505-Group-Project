@@ -1,6 +1,6 @@
 """
-种子数据脚本 - 用于创建测试booking和消息数据
-运行此脚本前请确保已经有用户数据
+Seed data script - Creates test booking and message data
+Make sure you have user data before running this script
 """
 from app import create_app
 from models import db
@@ -14,27 +14,27 @@ from datetime import datetime, date, time, timedelta
 def seed_bookings_and_messages():
     app = create_app()
     with app.app_context():
-        # 获取一些用户
+        # Get some users
         users = User.query.all()
         
         if len(users) < 2:
-            print("需要至少2个用户才能创建booking。请先运行seed.py创建用户。")
+            print("Need at least 2 users to create bookings. Please run seed.py first to create users.")
             return
         
-        # 找到parent和babysitter profile
+        # Find parent and babysitter profiles
         parent_profile = ParentProfile.query.first()
         babysitter_profile = BabysitterProfile.query.first()
         
         if not parent_profile or not babysitter_profile:
-            print("需要至少一个parent profile和一个babysitter profile。请先创建profile。")
+            print("Need at least one parent profile and one babysitter profile. Please create profiles first.")
             return
         
         parent = parent_profile.user
         babysitter = babysitter_profile.user
         
-        print(f"创建booking: Parent={parent.username}, Babysitter={babysitter.username}")
+        print(f"Creating booking: Parent={parent.username}, Babysitter={babysitter.username}")
         
-        # 创建几个booking
+        # Create several bookings
         bookings_data = [
             {
                 "parent_id": parent_profile.id,
@@ -63,7 +63,7 @@ def seed_bookings_and_messages():
         ]
         
         for booking_data in bookings_data:
-            # 检查是否已存在类似的booking
+            # Check if similar booking already exists
             existing = Booking.query.filter_by(
                 parent_id=booking_data["parent_id"],
                 babysitter_id=booking_data["babysitter_id"],
@@ -71,19 +71,19 @@ def seed_bookings_and_messages():
             ).first()
             
             if existing:
-                print(f"Booking已存在: {booking_data['date']}")
+                print(f"Booking already exists: {booking_data['date']}")
                 booking = existing
             else:
                 booking = Booking(**booking_data)
                 db.session.add(booking)
-                db.session.flush()  # 获取booking.id
-                print(f"创建新booking: {booking.id}")
+                db.session.flush()  # Get booking.id
+                print(f"Created new booking: {booking.id}")
             
-            # 计算结束时间用于显示
+            # Calculate end time for display
             start_datetime = datetime.combine(booking.date, booking.start_time)
             end_datetime = start_datetime + timedelta(hours=booking.duration_hours)
             
-            # 为每个booking创建一些消息
+            # Create some messages for each booking
             messages_data = [
                 {
                     "booking_id": booking.id,
@@ -119,7 +119,7 @@ def seed_bookings_and_messages():
                     "created_at": datetime.now() - timedelta(hours=20)
                 })
             
-            # 只添加不存在的消息
+            # Only add messages that don't exist
             for msg_data in messages_data:
                 existing_msg = Message.query.filter_by(
                     booking_id=msg_data["booking_id"],
@@ -132,9 +132,9 @@ def seed_bookings_and_messages():
                     db.session.add(message)
         
         db.session.commit()
-        print("✅ Booking和消息数据创建成功！")
-        print(f"总共创建了 {Booking.query.count()} 个bookings")
-        print(f"总共创建了 {Message.query.count()} 条消息")
+        print("✅ Booking and message data created successfully!")
+        print(f"Total bookings created: {Booking.query.count()}")
+        print(f"Total messages created: {Message.query.count()}")
 
 
 if __name__ == "__main__":
