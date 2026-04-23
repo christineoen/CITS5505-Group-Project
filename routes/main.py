@@ -63,7 +63,7 @@ def booking(babysitter_id):
 @main_bp.route("/messages")
 @login_required
 def messages():
-    return render_template("messages.html")
+    return redirect(url_for("messages.index"))
 
 @main_bp.route("/babysitter/<int:profile_id>")
 @login_required
