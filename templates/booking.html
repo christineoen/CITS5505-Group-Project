@@ -1,6 +1,78 @@
 {% extends "base.html" %}
+{% block title %}Book {{ babysitter.user.username }} – SitBuddy{% endblock %}
 
 {% block content %}
-<h2>Booking Page</h2>
-<p>This is the booking page.</p>
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endwith %}
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold mb-1">Request a Booking</h2>
+                <p class="text-muted mb-4">
+                    You are booking: <strong>{{ babysitter.user.username }}</strong>
+                    {% if babysitter.hourly_rate %}
+                        &nbsp;·&nbsp;
+                        <span class="badge bg-primary">${{ "%.2f"|format(babysitter.hourly_rate) }}/hr</span>
+                    {% endif %}
+                </p>
+
+                <form method="POST" novalidate id="booking-form">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.date.label(class="form-label fw-semibold") }}
+                        {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else "")) }}
+                        {% for error in form.date.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.start_time.label(class="form-label fw-semibold") }}
+                        {{ form.start_time(class="form-control" + (" is-invalid" if form.start_time.errors else ""), id="start_time") }}
+                        {% for error in form.start_time.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <div id="start-time-error" class="text-danger small mt-1 d-none">
+                            Start time must be between 06:00 and 22:00.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.duration_hours.label(class="form-label fw-semibold") }}
+                        {{ form.duration_hours(class="form-control" + (" is-invalid" if form.duration_hours.errors else ""), id="duration_hours", placeholder="1–12") }}
+                        {% for error in form.duration_hours.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <div id="duration-error" class="text-danger small mt-1 d-none">
+                            Duration must be between 1 and 12 hours.
+                        </div>
+                    </div>
+
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </form>
+
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.index') }}" class="text-muted small">← Back to listings</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
 {% endblock %}
