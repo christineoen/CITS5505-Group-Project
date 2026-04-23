@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
+from models import db
 from models.babysitter_profile import BabysitterProfile
 from models.parent_profile import ParentProfile
+from models.booking import Booking
+from forms import BookingForm
 from utils import POSTCODE_SUBURB, DAYS
 
 main_bp = Blueprint("main", __name__)
@@ -31,10 +34,30 @@ def index():
     )
 
 
-@main_bp.route("/booking")
+@main_bp.route("/booking/<int:babysitter_id>", methods=["GET", "POST"])
 @login_required
-def booking():
-    return render_template("booking.html")
+def booking(babysitter_id):
+    babysitter = BabysitterProfile.query.get_or_404(babysitter_id)
+
+    if not current_user.is_parent:
+        flash("You need a parent profile to make a booking.", "warning")
+        return redirect(url_for("main.index"))
+
+    form = BookingForm()
+    if form.validate_on_submit():
+        new_booking = Booking(
+            parent_id=current_user.parent_profile.id,
+            babysitter_id=babysitter.id,
+            date=form.date.data,
+            start_time=form.start_time.data,
+            duration_hours=form.duration_hours.data,
+        )
+        db.session.add(new_booking)
+        db.session.commit()
+        flash(f"Booking request sent to {babysitter.user.username}!", "success")
+        return redirect(url_for("main.index"))
+
+    return render_template("booking.html", babysitter=babysitter, form=form)
 
 
 @main_bp.route("/messages")
