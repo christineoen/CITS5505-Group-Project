@@ -115,7 +115,11 @@
 
             </div>
             <div class="card-footer bg-transparent border-0 text-center pb-3">
-                <a href="#" class="btn btn-primary btn-sm px-4">View Profile</a>
+                {% if mode == 'babysitters' %}
+                <a href="{{ url_for('main.babysitter_profile', profile_id=p.id) }}" class="btn btn-primary btn-sm px-4">View Profile</a>
+                {% else %}
+                <a href="{{ url_for('main.parent_profile', profile_id=p.id) }}" class="btn btn-primary btn-sm px-4">View Profile</a>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}babysitter Profile - SitBuddy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- Page Title -->
+            <div class="text-center mb-4">
+                <h1 class="fw-bold">My Profile</h1>
+                <p class="text-muted">View your personal information on SitBuddy.</p>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+
+                    <!-- Header Section -->
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center"
+                             style="width: 90px; height: 90px; font-size: 2rem; font-weight: bold;">
+                            {{ user.name[0] if user and user.name else "U" }}
+                        </div>
+                        <h3 class="mt-3 mb-1">{{ user.name if user else "User Name" }}</h3>
+                        <p class="text-muted mb-0">{{ user.role if user else "Parent / Babysitter" }}</p>
+                    </div>
+
+                    <hr>
+
+                    <!-- Profile Info -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <div class="form-control bg-light">
+                                {{ user.name if user else "Tom" }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            <div class="form-control bg-light">
+                                {{ user.email if user else "xxxxxxxxx.com" }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <div class="form-control bg-light">
+                                {{ user.phone if user else "+61 4XX XXX XXX" }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Role</label>
+                            <div class="form-control bg-light">
+                                {{ user.role if user else "Babysitter" }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Location</label>
+                            <div class="form-control bg-light">
+                                {{ user.location if user else "Perth, WA" }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Experience</label>
+                            <div class="form-control bg-light">
+                                {{ user.experience if user else "2 years" }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Bio</label>
+                            <div class="form-control bg-light" style="min-height: 120px;">
+                                {{ user.bio if user else "I am a caring and responsible babysitter with experience looking after children of different ages." }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary me-2">Back Home</a>
+                        <a href="#" class="btn btn-primary">Edit Profile</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
