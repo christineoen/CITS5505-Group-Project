@@ -12,15 +12,15 @@ messages_bp = Blueprint("messages", __name__, url_prefix="/messages")
 @messages_bp.route("/")
 @login_required
 def index():
-    """显示消息页面"""
+    """Display messages page"""
     return render_template("messages.html")
 
 
 @messages_bp.route("/api/conversations")
 @login_required
 def get_conversations():
-    """获取当前用户的所有对话列表"""
-    # 获取当前用户作为parent或babysitter的所有bookings
+    """Get all conversation list for current user"""
+    # Get all bookings where current user is parent or babysitter
     bookings = []
     if current_user.is_parent and current_user.parent_profile:
         bookings = Booking.query.filter_by(parent_id=current_user.parent_profile.id).all()
@@ -32,22 +32,22 @@ def get_conversations():
 
     conversations = []
     for booking in bookings:
-        # 确定对话的另一方
+        # Determine the other party in the conversation
         if current_user.parent_profile and booking.parent_id == current_user.parent_profile.id:
             other_user = booking.babysitter.user
         else:
             other_user = booking.parent.user
 
-        # 获取最后一条消息
+        # Get last message
         last_message = Message.query.filter_by(booking_id=booking.id).order_by(Message.created_at.desc()).first()
         
-        # 获取未读消息数量
+        # Get unread message count
         unread_count = Message.query.filter_by(
             booking_id=booking.id,
             is_read=False
         ).filter(Message.sender_id != current_user.id).count()
 
-        # 计算结束时间
+        # Calculate end time
         from datetime import datetime, timedelta
         start_datetime = datetime.combine(booking.date, booking.start_time)
         end_datetime = start_datetime + timedelta(hours=booking.duration_hours)
@@ -65,7 +65,7 @@ def get_conversations():
             "unread_count": unread_count
         })
 
-    # 按最后消息时间排序
+    # Sort by last message time
     conversations.sort(key=lambda x: x["last_message"]["created_at"] if x["last_message"] else "", reverse=True)
     
     return jsonify(conversations)
@@ -74,33 +74,33 @@ def get_conversations():
 @messages_bp.route("/api/conversation/<int:booking_id>")
 @login_required
 def get_conversation(booking_id):
-    """获取特定booking的所有消息"""
+    """Get all messages for a specific booking"""
     booking = Booking.query.get_or_404(booking_id)
     
-    # 验证用户是否有权限查看此对话
+    # Verify user has permission to view this conversation
     user_parent_id = current_user.parent_profile.id if current_user.parent_profile else None
     user_babysitter_id = current_user.babysitter_profile.id if current_user.babysitter_profile else None
     
     if booking.parent_id != user_parent_id and booking.babysitter_id != user_babysitter_id:
         return jsonify({"error": "Unauthorized"}), 403
 
-    # 标记所有消息为已读
+    # Mark all messages as read
     Message.query.filter_by(booking_id=booking_id).filter(
         Message.sender_id != current_user.id,
         Message.is_read == False
     ).update({"is_read": True})
     db.session.commit()
 
-    # 获取所有消息
+    # Get all messages
     messages = Message.query.filter_by(booking_id=booking_id).order_by(Message.created_at.asc()).all()
     
-    # 确定对话的另一方
+    # Determine the other party in the conversation
     if user_parent_id and booking.parent_id == user_parent_id:
         other_user = booking.babysitter.user
     else:
         other_user = booking.parent.user
 
-    # 计算结束时间
+    # Calculate end time
     from datetime import datetime, timedelta
     start_datetime = datetime.combine(booking.date, booking.start_time)
     end_datetime = start_datetime + timedelta(hours=booking.duration_hours)
@@ -123,7 +123,7 @@ def get_conversation(booking_id):
 @messages_bp.route("/api/send", methods=["POST"])
 @login_required
 def send_message():
-    """发送新消息"""
+    """Send new message"""
     data = request.get_json()
     booking_id = data.get("booking_id")
     content = data.get("content", "").strip()
@@ -133,14 +133,14 @@ def send_message():
 
     booking = Booking.query.get_or_404(booking_id)
     
-    # 验证用户是否有权限发送消息
+    # Verify user has permission to send message
     user_parent_id = current_user.parent_profile.id if current_user.parent_profile else None
     user_babysitter_id = current_user.babysitter_profile.id if current_user.babysitter_profile else None
     
     if booking.parent_id != user_parent_id and booking.babysitter_id != user_babysitter_id:
         return jsonify({"error": "Unauthorized"}), 403
 
-    # 创建新消息
+    # Create new message
     message = Message(
         booking_id=booking_id,
         sender_id=current_user.id,
@@ -155,10 +155,10 @@ def send_message():
 @messages_bp.route("/api/booking/<int:booking_id>/status", methods=["PUT"])
 @login_required
 def update_booking_status(booking_id):
-    """更新booking状态（接受/拒绝）"""
+    """Update booking status (accept/reject)"""
     booking = Booking.query.get_or_404(booking_id)
     
-    # 只有babysitter可以接受或拒绝booking
+    # Only babysitter can accept or reject booking
     user_babysitter_id = current_user.babysitter_profile.id if current_user.babysitter_profile else None
     if booking.babysitter_id != user_babysitter_id:
         return jsonify({"error": "Unauthorized"}), 403
@@ -173,7 +173,7 @@ def update_booking_status(booking_id):
     booking.updated_at = datetime.now()
     db.session.commit()
 
-    # 自动发送系统消息
+    # Automatically send system message
     system_message_content = f"Booking has been {new_status}."
     system_message = Message(
         booking_id=booking_id,
