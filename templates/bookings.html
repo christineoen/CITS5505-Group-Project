@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}My Bookings – SitBuddy{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+{% endwith %}
+
+{% macro status_badge(status) %}
+    {% if status == 'pending' %}
+        <span class="badge bg-warning text-dark">Pending</span>
+    {% elif status == 'accepted' %}
+        <span class="badge bg-success">Accepted</span>
+    {% elif status == 'rejected' %}
+        <span class="badge bg-danger">Rejected</span>
+    {% elif status == 'cancelled' %}
+        <span class="badge bg-secondary">Cancelled</span>
+    {% endif %}
+{% endmacro %}
+
+{# ── PARENT VIEW ── #}
+{% if current_user.is_parent %}
+<h2 class="fw-bold mb-4">My Booking Requests</h2>
+
+{% set sections = [
+    ('pending',   'Pending',   'warning'),
+    ('accepted',  'Accepted',  'success'),
+    ('rejected',  'Rejected',  'danger'),
+    ('cancelled', 'Cancelled', 'secondary'),
+] %}
+
+{% for key, label, color in sections %}
+{% set items = parent_bookings[key] %}
+{% if items %}
+<h5 class="fw-semibold text-{{ color }} mb-3 mt-4">{{ label }}</h5>
+<div class="row g-3 mb-2">
+    {% for b in items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="fw-semibold mb-0">{{ b.babysitter.user.username }}</h6>
+                    {{ status_badge(b.status) }}
+                </div>
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-calendar3 me-1"></i>{{ b.date.strftime('%d %b %Y') }}
+                </p>
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-clock me-1"></i>{{ b.start_time.strftime('%H:%M') }} · {{ b.duration_hours }}h
+                </p>
+                {% if b.babysitter.hourly_rate %}
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-currency-dollar me-1"></i>${{ "%.2f"|format(b.babysitter.hourly_rate) }}/hr
+                </p>
+                {% endif %}
+            </div>
+            {% if b.status == 'pending' %}
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                <form method="POST" action="{{ url_for('main.cancel_booking', booking_id=b.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                            onclick="return confirm('Cancel this booking request?')">
+                        Cancel Request
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+
+{% if not (parent_bookings.pending or parent_bookings.accepted or parent_bookings.rejected or parent_bookings.cancelled) %}
+<div class="text-center py-5 text-muted">
+    <p class="fs-5">You haven't made any booking requests yet.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Browse Babysitters</a>
+</div>
+{% endif %}
+{% endif %}
+
+{# ── BABYSITTER VIEW ── #}
+{% if current_user.is_babysitter %}
+<h2 class="fw-bold mb-4 {% if current_user.is_parent %}mt-5{% endif %}">Incoming Booking Requests</h2>
+
+{% set bs_sections = [
+    ('pending',  'Pending',  'warning'),
+    ('accepted', 'Accepted', 'success'),
+    ('rejected', 'Rejected', 'danger'),
+] %}
+
+{% for key, label, color in bs_sections %}
+{% set items = babysitter_bookings[key] %}
+{% if items %}
+<h5 class="fw-semibold text-{{ color }} mb-3 mt-4">{{ label }}</h5>
+<div class="row g-3 mb-2">
+    {% for b in items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="fw-semibold mb-0">{{ b.parent.user.username }}</h6>
+                    {{ status_badge(b.status) }}
+                </div>
+                {# Parent info #}
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-people me-1"></i>
+                    {{ b.parent.num_children or '?' }} child{{ 'ren' if b.parent.num_children != 1 else '' }}
+                </p>
+                {% if b.parent.location %}
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-geo-alt me-1"></i>{{ b.parent.location }}
+                </p>
+                {% endif %}
+                {% if b.parent.special_requirements %}
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-info-circle me-1"></i>{{ b.parent.special_requirements[:80] }}{% if b.parent.special_requirements|length > 80 %}…{% endif %}
+                </p>
+                {% endif %}
+                <hr class="my-2">
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-calendar3 me-1"></i>{{ b.date.strftime('%d %b %Y') }}
+                </p>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-clock me-1"></i>{{ b.start_time.strftime('%H:%M') }} · {{ b.duration_hours }}h
+                </p>
+            </div>
+            {% if b.status == 'pending' %}
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3 d-flex gap-2">
+                <form method="POST" action="{{ url_for('main.accept_booking', booking_id=b.id) }}" class="flex-fill">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-success btn-sm w-100">Accept</button>
+                </form>
+                <form method="POST" action="{{ url_for('main.reject_booking', booking_id=b.id) }}" class="flex-fill">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">Reject</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+
+{% if not (babysitter_bookings.pending or babysitter_bookings.accepted or babysitter_bookings.rejected) %}
+<div class="text-center py-5 text-muted">
+    <p class="fs-5">No booking requests yet.</p>
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}
