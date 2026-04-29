@@ -31,8 +31,20 @@
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><span class="dropdown-item-text text-muted small">{{ current_user.username }}</span></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
-                <li><a class="dropdown-item" href="#">Profile</a></li>
+                {% if current_user.is_parent and current_user.parent_profile %}
+                <li>
+                    <a class="dropdown-item" href="{{ url_for('main.parent_profile', profile_id=current_user.parent_profile.id) }}">
+                        Parent Profile
+                    </a>
+                </li>
+                {% endif %}
+                {% if current_user.is_babysitter and current_user.babysitter_profile %}
+                <li>
+                    <a class="dropdown-item" href="{{ url_for('main.babysitter_profile', profile_id=current_user.babysitter_profile.id) }}">
+                        Babysitter Profile
+                    </a>
+                </li>
+                {% endif %}
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
             </ul>

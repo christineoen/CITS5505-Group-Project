@@ -200,10 +200,14 @@ def messages():
 @main_bp.route("/babysitter/<int:profile_id>")
 @login_required
 def babysitter_profile(profile_id):
-    return render_template("babysitter_profile.html")
+    profile = BabysitterProfile.query.get_or_404(profile_id)
+    import json
+    days = json.loads(profile.availability) if profile.availability else []
+    return render_template("babysitter_profile.html", profile=profile, days=days)
 
 
 @main_bp.route("/parent/<int:profile_id>")
 @login_required
 def parent_profile(profile_id):
-    return render_template("parent_profile.html")
+    profile = ParentProfile.query.get_or_404(profile_id)
+    return render_template("parent_profile.html", profile=profile)

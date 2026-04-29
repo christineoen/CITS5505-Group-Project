@@ -48,3 +48,23 @@
 #messages-container::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* ── Profile Pages ── */
+.profile-stat {
+    padding: 0.75rem 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.profile-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+    line-height: 1.2;
+}
+
+.profile-stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.2rem;
+}
