@@ -32,7 +32,7 @@ def seed_bookings_and_messages():
         parent = parent_profile.user
         babysitter = babysitter_profile.user
         
-        print(f"Creating booking: Parent={parent.username}, Babysitter={babysitter.username}")
+        print(f"Creating booking: Parent={parent.name}, Babysitter={babysitter.name}")
         
         # Create several bookings
         bookings_data = [

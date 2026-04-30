@@ -8,9 +8,14 @@ class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
+    photo_url = db.Column(db.String(256))
+    suburb = db.Column(db.String(100))
+    postcode = db.Column(db.String(10))
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     babysitter_profile = db.relationship("BabysitterProfile", back_populates="user", uselist=False)
@@ -31,4 +36,4 @@ class User(db.Model, UserMixin):
         return self.parent_profile is not None
 
     def __repr__(self):
-        return f"<User {self.username}>"
+        return f"<User {self.name}>"

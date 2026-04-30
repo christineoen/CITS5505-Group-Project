@@ -42,11 +42,11 @@ async function loadConversations() {
                      onclick="loadConversation(${conv.booking_id})">
                     <div class="d-flex align-items-start">
                         <div class="avatar-circle bg-primary me-3" style="width:42px;height:42px;font-size:1.1rem;">
-                            ${conv.other_user.username[0].toUpperCase()}
+                            ${conv.other_user.name[0].toUpperCase()}
                         </div>
                         <div class="flex-grow-1 overflow-hidden">
                             <div class="d-flex justify-content-between align-items-start">
-                                <h6 class="mb-0">${conv.other_user.username}</h6>
+                                <h6 class="mb-0">${conv.other_user.name}</h6>
                                 ${unreadBadge}
                             </div>
                             <small class="text-muted d-block">
@@ -87,8 +87,8 @@ async function loadConversation(bookingId) {
         document.getElementById('conversation-view').classList.remove('d-none');
         
         // Update header info
-        document.getElementById('other-user-initial').textContent = data.other_user.username[0].toUpperCase();
-        document.getElementById('other-user-name').textContent = data.other_user.username;
+        document.getElementById('other-user-initial').textContent = data.other_user.name[0].toUpperCase();
+        document.getElementById('other-user-name').textContent = data.other_user.name;
         document.getElementById('booking-info').textContent = `${data.booking.date} ${data.booking.time}`;
         
         const statusBadge = document.getElementById('booking-status-badge');
@@ -138,7 +138,7 @@ function displayMessages(messages) {
         return `
             <div class="mb-3 ${alignment}">
                 <div class="d-inline-block ${bgColor} rounded px-3 py-2" style="max-width: 70%;">
-                    <div class="small fw-bold mb-1">${msg.sender_username}</div>
+                    <div class="small fw-bold mb-1">${msg.sender_name}</div>
                     <div>${escapeHtml(msg.content)}</div>
                     <div class="small opacity-75 mt-1">${timeAgo}</div>
                 </div>

@@ -56,7 +56,7 @@ def get_conversations():
             "booking_id": booking.id,
             "other_user": {
                 "id": other_user.id,
-                "username": other_user.username
+                "name": other_user.name
             },
             "booking_status": booking.status,
             "booking_date": booking.date.isoformat(),
@@ -114,7 +114,7 @@ def get_conversation(booking_id):
         },
         "other_user": {
             "id": other_user.id,
-            "username": other_user.username
+            "name": other_user.name
         },
         "messages": [msg.to_dict() for msg in messages]
     })

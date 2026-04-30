@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Set Up Parent Profile – SitBuddy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-sm-10 col-md-7 col-lg-5">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-body p-4 p-md-5">
+
+                <p class="text-muted small mb-1">Step 2 of 2</p>
+                <div class="d-flex gap-2 mb-4">
+                    <div class="flex-fill rounded-pill bg-primary" style="height:4px;"></div>
+                    <div class="flex-fill rounded-pill bg-primary" style="height:4px;"></div>
+                </div>
+
+                <a href="{{ url_for('auth.setup_profile') }}" class="text-muted small text-decoration-none d-inline-flex align-items-center gap-1 mb-3">
+                    ‹ Back
+                </a>
+
+                <h2 class="fw-bold mb-1">Set up your parent profile</h2>
+                <p class="text-muted mb-4">Help sitters know a little about your family.</p>
+
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3 position-relative">
+                        <label class="form-label fw-semibold">Suburb / Postcode</label>
+                        <input type="text" id="location-search" class="form-control"
+                               placeholder="Start typing suburb or postcode…" autocomplete="off"
+                               value="{{ (form.suburb.data ~ ' (' ~ form.postcode.data ~ ')') if form.suburb.data and form.postcode.data else (form.suburb.data or form.postcode.data or '') }}">
+                        <ul id="location-dropdown"
+                            class="list-group position-absolute w-100 shadow"
+                            style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
+                        {{ form.suburb(id="suburb", type="hidden") }}
+                        {{ form.postcode(id="postcode", type="hidden") }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Children</label>
+                        <div id="children-list" class="d-flex flex-column gap-2 mb-2"></div>
+                        <button type="button" id="add-child" class="btn btn-outline-secondary btn-sm">
+                            + Add child
+                        </button>
+                        {{ form.children_json(id="children-json", type="hidden") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.about.label(class="form-label fw-semibold") }}
+                        {{ form.about(class="form-control", rows=3, placeholder="Allergies, routines, anything sitters should know…") }}
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        {{ form.submit(class="btn btn-primary btn-lg fw-semibold") }}
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
+{% endblock %}

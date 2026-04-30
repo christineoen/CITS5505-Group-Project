@@ -1,5 +1,9 @@
 {% extends "base.html" %}
-{% block title %}{{ profile.user.username }} – SitBuddy{% endblock %}
+{% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -14,53 +18,50 @@
                     <!-- Header -->
                     <div class="text-center mb-4">
                         <div class="avatar-circle bg-success mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
-                            {{ profile.user.username[0].upper() }}
+                            {{ profile.user.name[0].upper() }}
                         </div>
-                        <h3 class="fw-bold mb-1">{{ profile.user.username }}</h3>
+                        <h3 class="fw-bold mb-1">{{ profile.user.name }}</h3>
                         <p class="text-muted mb-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
                                 <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                             </svg>
-                            {{ profile.location or "Location not set" }}
+                            {{ profile.user.suburb or profile.user.postcode or "Location not set" }}
                         </p>
                     </div>
 
                     <hr>
 
-                    <!-- Stats row -->
-                    <div class="row text-center g-3 my-2">
-                        <div class="col-6">
-                            <div class="profile-stat">
-                                <div class="profile-stat-value">{{ profile.num_children if profile.num_children is not none else "–" }}</div>
-                                <div class="profile-stat-label">{{ 'child' if profile.num_children == 1 else 'children' }}</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="profile-stat">
-                                <div class="profile-stat-value">
-                                    {% if profile.special_requirements %}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--bs-success)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                    </svg>
-                                    {% else %}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--bs-secondary)" class="bi bi-dash-circle" viewBox="0 0 16 16">
-                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                                        <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
-                                    </svg>
-                                    {% endif %}
-                                </div>
-                                <div class="profile-stat-label">special requirements</div>
-                            </div>
+                    <!-- Children -->
+                    {% if profile.children %}
+                    <div class="mb-3">
+                        <p class="fw-semibold mb-2">{{ 'Child' if profile.children|length == 1 else 'Children' }}</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for child in profile.children %}
+                            <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+                                {{ child.name or 'Child' }}{% if child.age is not none %}, {{ child.age }} yr{{ 's' if child.age != 1 else '' }}{% endif %}
+                            </span>
+                            {% endfor %}
                         </div>
                     </div>
+                    {% endif %}
 
                     <hr>
 
-                    <!-- Special requirements -->
-                    {% if profile.special_requirements %}
+                    {% if profile.about %}
                     <div class="mb-3">
-                        <p class="fw-semibold mb-1">Special Requirements</p>
-                        <p class="text-muted">{{ profile.special_requirements }}</p>
+                        <p class="fw-semibold mb-1">About</p>
+                        <p class="text-muted">{{ profile.about }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Location map -->
+                    {% if profile.user.latitude and profile.user.longitude %}
+                    <div class="mb-3">
+                        <p class="fw-semibold mb-2">Location</p>
+                        <div id="profile-map"
+                             data-lat="{{ profile.user.latitude }}"
+                             data-lng="{{ profile.user.longitude }}"
+                             style="height:200px;border-radius:8px;overflow:hidden;"></div>
                     </div>
                     {% endif %}
 
@@ -77,4 +78,11 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if profile.user.latitude and profile.user.longitude %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
+{% endif %}
 {% endblock %}
