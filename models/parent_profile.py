@@ -7,20 +7,23 @@ class ParentProfile(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
-    num_children = db.Column(db.Integer)
-    location = db.Column(db.String(128))
-    special_requirements = db.Column(db.Text)
+    children = db.Column(db.JSON, default=list)
+    about = db.Column(db.Text)
 
     user = db.relationship("User", back_populates="parent_profile")
 
     def to_card(self):
+        postcode = self.user.postcode or ""
+        suburb = self.user.suburb or POSTCODE_SUBURB.get(postcode, "")
         return {
             "id": self.id,
-            "username": self.user.username,
-            "location": self.location or "",
-            "suburb": POSTCODE_SUBURB.get(self.location, self.location or ""),
-            "num_children": self.num_children,
-            "special_requirements": self.special_requirements or "",
+            "name": self.user.name,
+            "location": postcode,
+            "suburb": suburb,
+            "num_children": len(self.children) if self.children else 0,
+            "about": self.about or "",
+            "lat": self.user.latitude,
+            "lng": self.user.longitude,
         }
 
     def __repr__(self):

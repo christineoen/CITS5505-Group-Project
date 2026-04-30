@@ -14,7 +14,7 @@ GET /auth/signup
 
 POST /auth/signup
   → validate form
-  → check email/username not already taken
+  → check email not already taken
   → create User, call set_password()
   → if is_parent checked: create ParentProfile(user_id=user.id)
   → if is_babysitter checked: create BabysitterProfile(user_id=user.id)
@@ -27,7 +27,7 @@ POST /auth/signup
 
 | Field | Type | Validation |
 |-------|------|-----------|
-| username | StringField | Required, length 2–64, unique |
+| name | StringField | Required, length 2–64, unique |
 | email | EmailField | Required, valid email, unique |
 | password | PasswordField | Required, min length 8 |
 | confirm_password | PasswordField | Must match password |
@@ -40,7 +40,7 @@ POST /auth/signup
 ┌─────────────────────────────┐
 │         Create Account      │
 │                             │
-│  Username  [_____________]  │
+│  Name  [_____________]  │
 │  Email     [_____________]  │
 │  Password  [_____________]  │
 │  Confirm   [_____________]  │
@@ -154,6 +154,6 @@ from forms import RegistrationForm, LoginForm
 ## Validation Notes
 
 - Flash errors using `flash(message, 'danger')` so Bootstrap alert styling works
-- Check for duplicate email/username before committing — query DB and flash specific error if taken
+- Check for duplicate email before committing — query DB and flash specific error if taken
 - `login_view = "auth.login"` is already set in `app.py`, so `@login_required` redirects automatically
 - After signup/login, use `redirect(request.args.get('next') or url_for('main.index'))` — but validate `next` is a relative URL to prevent open redirect attacks

@@ -11,6 +11,13 @@ from utils import POSTCODE_SUBURB, DAYS
 main_bp = Blueprint("main", __name__)
 
 
+@main_bp.before_request
+def require_profile_setup():
+    if current_user.is_authenticated:
+        if not current_user.is_parent and not current_user.is_babysitter:
+            return redirect(url_for("auth.setup_profile"))
+
+
 @main_bp.route("/")
 def index():
     mode = None
@@ -89,7 +96,7 @@ def booking(babysitter_id):
         )
         db.session.add(new_booking)
         db.session.commit()
-        flash(f"Booking request sent to {babysitter.user.username}!", "success")
+        flash(f"Booking request sent to {babysitter.user.name}!", "success")
         return redirect(url_for("main.bookings"))
 
     return render_template("booking.html", babysitter=babysitter, form=form)

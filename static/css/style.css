@@ -17,13 +17,6 @@
 }
 
 /* ── Messages Page ── */
-.conversation-item {
-    transition: background-color 0.2s;
-}
-
-.conversation-item:hover {
-    background-color: #f8f9fa !important;
-}
 
 #messages-container {
     background-color: #fafafa;
@@ -48,6 +41,17 @@
 #messages-container::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* ── Role selection cards (signup step 1) ── */
+.role-card {
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    transition: border-color .15s, background-color .15s;
+}
+.role-card:hover { border-color: #0d6efd; }
+.role-card.selected { background-color: #e8f0fe; border-color: #0d6efd; }
+.role-card.selected .chevron { color: #0d6efd; }
 
 /* ── Profile Pages ── */
 .profile-stat {

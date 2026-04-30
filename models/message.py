@@ -20,7 +20,7 @@ class Message(db.Model):
             "id": self.id,
             "booking_id": self.booking_id,
             "sender_id": self.sender_id,
-            "sender_username": self.sender.username,
+            "sender_name": self.sender.name,
             "content": self.content,
             "created_at": self.created_at.isoformat(),
             "is_read": self.is_read
