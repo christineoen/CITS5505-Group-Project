@@ -6,7 +6,8 @@ from models.babysitter_profile import BabysitterProfile
 from models.parent_profile import ParentProfile
 from models.booking import Booking
 from forms import BookingForm
-from utils import POSTCODE_SUBURB, DAYS
+import json
+from utils import POSTCODE_SUBURB, DAYS, geocode_suburb
 
 main_bp = Blueprint("main", __name__)
 
@@ -227,9 +228,26 @@ def parent_profile_edit(profile_id):
     profile = ParentProfile.query.get_or_404(profile_id)
     if not current_user.is_parent or current_user.parent_profile.id != profile_id:
         abort(403)
-    profile.num_children = request.form.get("num_children", type=int)
-    profile.location = request.form.get("location", "").strip() or None
-    profile.special_requirements = request.form.get("special_requirements", "").strip() or None
+
+    profile.about = request.form.get("about", "").strip() or None
+
+    try:
+        children = json.loads(request.form.get("children_json", "[]"))
+        if not isinstance(children, list):
+            children = []
+    except (ValueError, TypeError):
+        children = []
+    profile.children = children
+
+    suburb = request.form.get("suburb", "").strip() or None
+    postcode = request.form.get("postcode", "").strip() or None
+    if suburb != current_user.suburb or postcode != current_user.postcode:
+        current_user.suburb = suburb
+        current_user.postcode = postcode
+        lat, lng = geocode_suburb(suburb, postcode)
+        current_user.latitude = lat
+        current_user.longitude = lng
+
     db.session.commit()
     flash("Profile updated.", "success")
     return redirect(url_for("main.parent_profile", profile_id=profile_id))

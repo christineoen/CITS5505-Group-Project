@@ -106,8 +106,10 @@ if (addBtn) {
     addBtn.addEventListener('click', () => addChildRow('', null));
 
     try {
-        const existing = JSON.parse(hiddenField.value || '[]');
-        existing.forEach(c => addChildRow(c.name || '', c.age));
+        const seed = (typeof window._parentChildren !== 'undefined')
+            ? window._parentChildren
+            : JSON.parse(hiddenField.value || '[]');
+        seed.forEach(c => addChildRow(c.name || '', c.age));
     } catch (_) {}
 
     document.querySelector('form').addEventListener('submit', serializeChildren);
