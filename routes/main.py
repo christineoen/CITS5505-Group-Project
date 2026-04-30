@@ -210,4 +210,19 @@ def babysitter_profile(profile_id):
 @login_required
 def parent_profile(profile_id):
     profile = ParentProfile.query.get_or_404(profile_id)
-    return render_template("parent_profile.html", profile=profile)
+    is_own = current_user.is_parent and current_user.parent_profile.id == profile_id
+    return render_template("parent_profile.html", profile=profile, is_own=is_own)
+
+
+@main_bp.route("/parent/<int:profile_id>/edit", methods=["POST"])
+@login_required
+def parent_profile_edit(profile_id):
+    profile = ParentProfile.query.get_or_404(profile_id)
+    if not current_user.is_parent or current_user.parent_profile.id != profile_id:
+        abort(403)
+    profile.num_children = request.form.get("num_children", type=int)
+    profile.location = request.form.get("location", "").strip() or None
+    profile.special_requirements = request.form.get("special_requirements", "").strip() or None
+    db.session.commit()
+    flash("Profile updated.", "success")
+    return redirect(url_for("main.parent_profile", profile_id=profile_id))
