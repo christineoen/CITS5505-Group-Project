@@ -1,52 +1,51 @@
 // Postcode / suburb autocomplete
-(function () {
-    const searchInput    = document.getElementById('location-search');
-    const dropdown       = document.getElementById('location-dropdown');
-    const suburbHidden   = document.getElementById('suburb');
-    const postcodeHidden = document.getElementById('postcode');
-    if (!searchInput) return;
+const searchInput    = document.getElementById('location-search');
+const dropdown       = document.getElementById('location-dropdown');
+const suburbHidden   = document.getElementById('suburb');
+const postcodeHidden = document.getElementById('postcode');
 
-    let debounceTimer = null;
-    let activeIndex   = -1;
+let debounceTimer = null;
+let activeIndex   = -1;
 
-    function showDropdown(results) {
-        dropdown.innerHTML = '';
-        if (!results.length) { dropdown.style.display = 'none'; return; }
-        results.forEach(r => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item list-group-item-action py-2';
-            li.textContent = `${r.suburb} (${r.postcode})`;
-            li.addEventListener('mousedown', e => { e.preventDefault(); selectResult(r); });
-            dropdown.appendChild(li);
-        });
-        dropdown.style.display = 'block';
-        activeIndex = -1;
-    }
+function showDropdown(results) {
+    dropdown.innerHTML = '';
+    if (!results.length) { dropdown.style.display = 'none'; return; }
+    results.forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item list-group-item-action py-2';
+        li.textContent = `${r.suburb} (${r.postcode})`;
+        li.addEventListener('mousedown', e => { e.preventDefault(); selectResult(r); });
+        dropdown.appendChild(li);
+    });
+    dropdown.style.display = 'block';
+    activeIndex = -1;
+}
 
-    function selectResult(r) {
-        searchInput.value    = `${r.suburb} (${r.postcode})`;
-        suburbHidden.value   = r.suburb;
-        postcodeHidden.value = r.postcode;
-        dropdown.style.display = 'none';
-    }
+function selectResult(r) {
+    searchInput.value    = `${r.suburb} (${r.postcode})`;
+    suburbHidden.value   = r.suburb;
+    postcodeHidden.value = r.postcode;
+    dropdown.style.display = 'none';
+}
 
-    function clearSelection() {
-        suburbHidden.value   = '';
-        postcodeHidden.value = '';
-    }
+function clearSelection() {
+    suburbHidden.value   = '';
+    postcodeHidden.value = '';
+}
 
-    async function search(q) {
-        if (q.length < 2) { dropdown.style.display = 'none'; return; }
-        try {
-            const resp = await fetch(`/auth/postcode-search?q=${encodeURIComponent(q)}`);
-            showDropdown(await resp.json());
-        } catch (_) { dropdown.style.display = 'none'; }
-    }
+async function searchPostcode(q) {
+    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+    try {
+        const resp = await fetch(`/auth/postcode-search?q=${encodeURIComponent(q)}`);
+        showDropdown(await resp.json());
+    } catch (_) { dropdown.style.display = 'none'; }
+}
 
+if (searchInput) {
     searchInput.addEventListener('input', function () {
         clearSelection();
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => search(this.value.trim()), 300);
+        debounceTimer = setTimeout(() => searchPostcode(this.value.trim()), 300);
     });
 
     searchInput.addEventListener('keydown', function (e) {
@@ -73,45 +72,43 @@
             dropdown.style.display = 'none';
         }
     });
-})();
+}
 
 // Children dynamic form — parent setup only; no-ops silently on sitter page
-(function () {
-    const addBtn      = document.getElementById('add-child');
-    const list        = document.getElementById('children-list');
-    const hiddenField = document.getElementById('children-json');
-    if (!addBtn) return;
+const addBtn      = document.getElementById('add-child');
+const childList   = document.getElementById('children-list');
+const hiddenField = document.getElementById('children-json');
 
-    function serialize() {
-        const children = [];
-        list.querySelectorAll('.child-row').forEach(row => {
-            const name = row.querySelector('.child-name').value.trim();
-            const age  = parseInt(row.querySelector('.child-age').value, 10);
-            children.push({ name: name || null, age: isNaN(age) ? null : age });
-        });
-        hiddenField.value = JSON.stringify(children);
-    }
+function serializeChildren() {
+    const children = [];
+    childList.querySelectorAll('.child-row').forEach(row => {
+        const name = row.querySelector('.child-name').value.trim();
+        const age  = parseInt(row.querySelector('.child-age').value, 10);
+        children.push({ name: name || null, age: isNaN(age) ? null : age });
+    });
+    hiddenField.value = JSON.stringify(children);
+}
 
-    function addRow(name, age) {
-        const row = document.createElement('div');
-        row.className = 'child-row d-flex gap-2 align-items-center';
-        row.innerHTML = `
-            <input type="text"   class="form-control child-name" placeholder="Name (optional)" value="${name || ''}">
-            <input type="number" class="form-control child-age"  placeholder="Age" min="0" max="17" style="width:90px;" value="${age !== null && age !== undefined ? age : ''}">
-            <button type="button" class="btn btn-outline-danger btn-sm remove-child" aria-label="Remove">✕</button>`;
-        row.querySelector('.remove-child').addEventListener('click', () => { row.remove(); serialize(); });
-        row.querySelectorAll('input').forEach(el => el.addEventListener('input', serialize));
-        list.appendChild(row);
-        serialize();
-    }
+function addChildRow(name, age) {
+    const row = document.createElement('div');
+    row.className = 'child-row d-flex gap-2 align-items-center';
+    row.innerHTML = `
+        <input type="text"   class="form-control child-name" placeholder="Name (optional)" value="${name || ''}">
+        <input type="number" class="form-control child-age"  placeholder="Age" min="0" max="17" style="width:90px;" value="${age !== null && age !== undefined ? age : ''}">
+        <button type="button" class="btn btn-outline-danger btn-sm remove-child" aria-label="Remove">✕</button>`;
+    row.querySelector('.remove-child').addEventListener('click', () => { row.remove(); serializeChildren(); });
+    row.querySelectorAll('input').forEach(el => el.addEventListener('input', serializeChildren));
+    childList.appendChild(row);
+    serializeChildren();
+}
 
-    addBtn.addEventListener('click', () => addRow('', null));
+if (addBtn) {
+    addBtn.addEventListener('click', () => addChildRow('', null));
 
-    // Restore rows on POST-back validation failure
     try {
         const existing = JSON.parse(hiddenField.value || '[]');
-        existing.forEach(c => addRow(c.name || '', c.age));
+        existing.forEach(c => addChildRow(c.name || '', c.age));
     } catch (_) {}
 
-    document.querySelector('form').addEventListener('submit', serialize);
-})();
+    document.querySelector('form').addEventListener('submit', serializeChildren);
+}
