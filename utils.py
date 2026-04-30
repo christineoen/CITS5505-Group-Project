@@ -1,3 +1,7 @@
+import json
+import urllib.request
+from urllib.parse import quote as urlquote
+
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 # Approximate suburb centroids for known Perth postcodes (lat, lng)
@@ -21,9 +25,6 @@ def geocode_suburb(suburb, postcode):
         return POSTCODE_COORDS[postcode]
     q = f"{suburb}, {postcode}, Australia" if suburb else f"{postcode}, Australia"
     try:
-        import urllib.request
-        import json
-        from urllib.parse import quote as urlquote
         url = f"https://nominatim.openstreetmap.org/search?q={urlquote(q)}&format=json&limit=1"
         req = urllib.request.Request(url, headers={"User-Agent": "SitBuddy/1.0"})
         with urllib.request.urlopen(req, timeout=3) as resp:
