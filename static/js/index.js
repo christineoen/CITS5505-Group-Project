@@ -27,6 +27,7 @@ function applyFilters() {
         noResults.classList.toggle('d-none', visible > 0);
         grid.classList.toggle('d-none', visible === 0);
     }
+    applyMapFilters();
 }
 
 function clearFilters() {
@@ -52,9 +53,26 @@ const btnList  = document.getElementById('btn-list');
 const btnMap   = document.getElementById('btn-map');
 
 let browseMap = null;
+let mapMarkers = [];
+
+function applyMapFilters() {
+    if (!browseMap) return;
+    const location   = locationSelect ? locationSelect.value : '';
+    const checkedDays = [...dayCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+
+    mapMarkers.forEach(({ marker, profile: p }) => {
+        const locationMatch = !location || p.location === location;
+        const dayMatch = checkedDays.length === 0 || checkedDays.some(d => p.days.includes(d));
+        if (locationMatch && dayMatch) {
+            marker.addTo(browseMap);
+        } else {
+            marker.remove();
+        }
+    });
+}
 
 function initBrowseMap() {
-    if (browseMap) { browseMap.invalidateSize(); return; }
+    if (browseMap) { browseMap.invalidateSize(); applyMapFilters(); return; }
     browseMap = L.map('map-view').setView([-31.95, 115.86], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -64,8 +82,10 @@ function initBrowseMap() {
         const label = mode === 'babysitters'
             ? `<strong>${p.name}</strong><br>${p.suburb || p.location}<br>$${p.hourly_rate}/hr<br><a href="/babysitter/${p.id}">View Profile</a>`
             : `<strong>${p.name}</strong><br>${p.suburb || p.location}<br><a href="/parent/${p.id}">View Profile</a>`;
-        L.marker([p.lat, p.lng]).addTo(browseMap).bindPopup(label);
+        const marker = L.marker([p.lat, p.lng]).addTo(browseMap).bindPopup(label);
+        mapMarkers.push({ marker, profile: p });
     });
+    applyMapFilters();
 }
 
 if (btnMap) btnMap.addEventListener('click', function () {
