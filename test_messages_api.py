@@ -7,7 +7,7 @@ from requests.auth import HTTPBasicAuth
 
 # Configuration
 BASE_URL = "http://127.0.0.1:5000"
-TEST_USERNAME = "parent1"  # Modify according to your seed data
+TEST_EMAIL = "sarah@example.com"  # Modify according to your seed data
 TEST_PASSWORD = "password123"  # Modify according to your seed data
 
 def test_api():
@@ -23,7 +23,7 @@ def test_api():
     # 1. Test login
     print("\n1. Testing login...")
     login_data = {
-        "username": TEST_USERNAME,
+        "email": TEST_EMAIL,
         "password": TEST_PASSWORD
     }
     response = session.post(f"{BASE_URL}/auth/login", data=login_data, allow_redirects=False)
@@ -45,7 +45,7 @@ def test_api():
         if conversations:
             print("\nConversation list:")
             for i, conv in enumerate(conversations, 1):
-                print(f"  {i}. Conversation with {conv['other_user']['username']}")
+                print(f"  {i}. Conversation with {conv['other_user']['name']}")
                 print(f"     Status: {conv['booking_status']}")
                 print(f"     Date: {conv['booking_date']} {conv['booking_time']}")
                 print(f"     Unread: {conv['unread_count']}")
@@ -64,13 +64,13 @@ def test_api():
         if response.status_code == 200:
             conversation = response.json()
             print(f"✅ Successfully retrieved conversation details")
-            print(f"   Conversation with: {conversation['other_user']['username']}")
+            print(f"   Conversation with: {conversation['other_user']['name']}")
             print(f"   Message count: {len(conversation['messages'])}")
             
             if conversation['messages']:
                 print("\n   Recent messages:")
                 for msg in conversation['messages'][-3:]:  # Show last 3
-                    print(f"   - {msg['sender_username']}: {msg['content']}")
+                    print(f"   - {msg['sender_name']}: {msg['content']}")
         else:
             print(f"❌ Failed to get conversation details: {response.status_code}")
     
@@ -139,7 +139,7 @@ def check_database():
         
         if message_count > 0:
             cursor.execute("""
-                SELECT m.id, u.username, m.content, m.created_at
+                SELECT m.id, u.name, m.content, m.created_at
                 FROM messages m
                 JOIN users u ON m.sender_id = u.id
                 ORDER BY m.created_at DESC

@@ -25,7 +25,7 @@ User (users)
 | Column | Type | Notes |
 |--------|------|-------|
 | id | Integer | Primary key |
-| username | String(64) | Unique, not null |
+| name | String(64) | Unique, not null |
 | email | String(120) | Unique, not null |
 | password_hash | String(256) | Not null |
 | created_at | DateTime | Auto-set on creation |
@@ -64,7 +64,7 @@ User (users)
 | user_id | Integer | FK → users.id, unique |
 | num_children | Integer | Number of children |
 | location | String(128) | Home location |
-| special_requirements | Text | Any special needs or notes |
+| about | Text | Any special needs or notes |
 
 ---
 

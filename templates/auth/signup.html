@@ -22,9 +22,9 @@
                     {{ form.hidden_tag() }}
 
                     <div class="mb-3">
-                        {{ form.username.label(class="form-label fw-semibold") }}
-                        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="Your username") }}
-                        {% for error in form.username.errors %}
+                        {{ form.name.label(class="form-label fw-semibold") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="Your name") }}
+                        {% for error in form.name.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -50,21 +50,6 @@
                         {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Repeat password") }}
                         {% for error in form.confirm_password.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <div class="mb-4">
-                        <p class="fw-semibold mb-2">I am a:</p>
-                        <div class="form-check">
-                            {{ form.is_parent(class="form-check-input") }}
-                            {{ form.is_parent.label(class="form-check-label") }}
-                        </div>
-                        <div class="form-check">
-                            {{ form.is_babysitter(class="form-check-input") }}
-                            {{ form.is_babysitter.label(class="form-check-label") }}
-                        </div>
-                        {% for error in form.is_parent.errors %}
-                            <div class="text-danger small mt-1">{{ error }}</div>
                         {% endfor %}
                     </div>
 

@@ -25,11 +25,11 @@
                     aria-expanded="false">
                 <div class="avatar-circle bg-primary border border-white"
                      style="width:42px;height:42px;font-size:1.1rem;">
-                    {{ current_user.username[0].upper() }}
+                    {{ current_user.name[0].upper() }}
                 </div>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><span class="dropdown-item-text text-muted small">{{ current_user.username }}</span></li>
+                <li><span class="dropdown-item-text text-muted small">{{ current_user.name }}</span></li>
                 <li><hr class="dropdown-divider"></li>
                 {% if current_user.is_parent and current_user.parent_profile %}
                 <li>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Book {{ babysitter.user.username }} – SitBuddy{% endblock %}
+{% block title %}Book {{ babysitter.user.name }} – SitBuddy{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -19,7 +19,7 @@
 
                 <h2 class="fw-bold mb-1">Request a Booking</h2>
                 <p class="text-muted mb-4">
-                    You are booking: <strong>{{ babysitter.user.username }}</strong>
+                    You are booking: <strong>{{ babysitter.user.name }}</strong>
                     {% if babysitter.hourly_rate %}
                         &nbsp;·&nbsp;
                         <span class="badge bg-primary">${{ "%.2f"|format(babysitter.hourly_rate) }}/hr</span>

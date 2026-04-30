@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Home – SitBuddy{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
 {% block content %}
 
 {% if not current_user.is_authenticated %}
@@ -21,6 +25,20 @@
         <p class="text-muted mb-0 mt-1">
             <span id="results-count">{{ profiles|length }}</span> result{{ 's' if profiles|length != 1 else '' }}
         </p>
+    </div>
+    <div class="btn-group" role="group" aria-label="View toggle">
+        <button id="btn-list" type="button" class="btn btn-primary btn-sm px-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-grid-3x2-gap me-1" viewBox="0 0 16 16">
+                <path d="M4 4v2H2V4zm1-1H1v4h4zm6 1v2H9V4zm1-1H8v4h4zM4 9v2H2V9zm1-1H1v4h4zm6 1v2H9V9zm1-1H8v4h4zm-3 6v2H2v-2zm1-1H1v4h4zm6 1v2H9v-2zm1-1H8v4h4z"/>
+            </svg>
+            List
+        </button>
+        <button id="btn-map" type="button" class="btn btn-outline-secondary btn-sm px-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-map me-1" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+            </svg>
+            Map
+        </button>
     </div>
 </div>
 
@@ -61,6 +79,9 @@
     </div>
 </div>
 
+{# Map view #}
+<div id="map-view" class="d-none mb-4" style="height:480px;border-radius:8px;overflow:hidden;"></div>
+
 {# Cards grid #}
 <div class="row g-4" id="cards-grid">
     {% set avatar_colors = ['primary', 'success', 'danger', 'warning', 'info', 'secondary'] %}
@@ -73,10 +94,10 @@
             <div class="card-body text-center px-4 pt-4 pb-2">
 
                 <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} mx-auto mb-3">
-                    {{ p.username[0].upper() }}
+                    {{ p.name[0].upper() }}
                 </div>
 
-                <h5 class="card-title mb-1 fw-semibold">{{ p.username }}</h5>
+                <h5 class="card-title mb-1 fw-semibold">{{ p.name }}</h5>
                 <p class="text-muted small mb-3">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
                         <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
@@ -106,9 +127,9 @@
                         {{ p.num_children }} child{{ 'ren' if p.num_children != 1 else '' }}
                     </span>
                 </div>
-                {% if p.special_requirements %}
+                {% if p.about %}
                 <p class="card-text text-muted small text-start">
-                    {{ p.special_requirements[:100] }}{% if p.special_requirements|length > 100 %}…{% endif %}
+                    {{ p.about[:100] }}{% if p.about|length > 100 %}…{% endif %}
                 </p>
                 {% endif %}
                 {% endif %}
@@ -138,5 +159,12 @@
 
 
 {% block scripts %}
+{% if current_user.is_authenticated %}
+<script>
+window._sitbuddyProfiles = {{ profiles | tojson }};
+window._sitbuddyMode     = {{ mode | tojson }};
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

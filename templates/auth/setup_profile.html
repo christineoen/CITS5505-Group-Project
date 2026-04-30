@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Get Started – SitBuddy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-sm-10 col-md-7 col-lg-5">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-body p-4 p-md-5">
+
+                <p class="text-muted small mb-1">Step 1 of 2</p>
+                <div class="d-flex gap-2 mb-4">
+                    <div class="flex-fill rounded-pill bg-primary" style="height:4px;"></div>
+                    <div class="flex-fill rounded-pill bg-secondary bg-opacity-25" style="height:4px;"></div>
+                </div>
+
+                <h2 class="fw-bold mb-1">How can we help?</h2>
+                <p class="text-muted mb-4">Select what brings you here today.</p>
+
+                <form method="POST" id="role-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="role" id="selected-role" value="{{ pending_role or '' }}">
+
+                    <div class="d-flex flex-column gap-3 mb-4">
+
+                        <button type="button" class="role-card text-start w-100 border rounded-3 p-3 d-flex align-items-center gap-3 bg-white"
+                                data-role="parent">
+                            <span class="fs-3">👨‍👧</span>
+                            <div class="flex-fill">
+                                <div class="fw-semibold">I need a babysitter</div>
+                                <div class="text-muted small">Find trusted sitters for your family</div>
+                            </div>
+                            <span class="chevron text-secondary">›</span>
+                        </button>
+
+                        <button type="button" class="role-card text-start w-100 border rounded-3 p-3 d-flex align-items-center gap-3 bg-white"
+                                data-role="sitter">
+                            <span class="fs-3">🧑‍🍼</span>
+                            <div class="flex-fill">
+                                <div class="fw-semibold">I am a babysitter</div>
+                                <div class="text-muted small">Create a profile and find families</div>
+                            </div>
+                            <span class="chevron text-secondary">›</span>
+                        </button>
+
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" id="continue-btn" class="btn btn-primary btn-lg fw-semibold" disabled>
+                            Continue
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/setup-role.js') }}"></script>
+{% endblock %}

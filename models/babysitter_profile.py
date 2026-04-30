@@ -11,21 +11,24 @@ class BabysitterProfile(db.Model):
     bio = db.Column(db.Text)
     hourly_rate = db.Column(db.Float)
     experience_years = db.Column(db.Integer)
-    location = db.Column(db.String(128))
     availability = db.Column(db.String(256))
 
     user = db.relationship("User", back_populates="babysitter_profile")
 
     def to_card(self):
+        postcode = self.user.postcode or ""
+        suburb = self.user.suburb or POSTCODE_SUBURB.get(postcode, "")
         return {
             "id": self.id,
-            "username": self.user.username,
-            "location": self.location or "",
-            "suburb": POSTCODE_SUBURB.get(self.location, self.location or ""),
+            "name": self.user.name,
+            "location": postcode,
+            "suburb": suburb,
             "bio": self.bio or "",
             "hourly_rate": self.hourly_rate,
             "experience_years": self.experience_years,
             "days": json.loads(self.availability) if self.availability else [],
+            "lat": self.user.latitude,
+            "lng": self.user.longitude,
         }
 
     def __repr__(self):
