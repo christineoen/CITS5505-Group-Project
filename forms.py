@@ -66,4 +66,5 @@ class BookingForm(FlaskForm):
         "Duration (hours)",
         validators=[DataRequired(), NumberRange(min=1, max=12, message="Duration must be between 1 and 12 hours.")],
     )
+    notes = TextAreaField("Notes (optional)", validators=[Optional(), Length(max=500)])
     submit = SubmitField("Request Booking")
