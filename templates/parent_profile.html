@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-{% endblock %}
-
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -25,10 +21,7 @@
                 <div class="card-body p-4">
 
                     <!-- Header -->
-                    <div class="position-relative text-center mb-4">
-                        {% if is_own %}
-                        <button id="edit-btn" type="button" class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0">Edit</button>
-                        {% endif %}
+                    <div class="text-center mb-4">
                         <div class="avatar-circle bg-success mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
                             {{ profile.user.name[0].upper() }}
                         </div>
@@ -37,7 +30,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
                                 <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                             </svg>
-                            {{ profile.user.suburb or profile.user.postcode or "Location not set" }}
+                            {% if profile.user.suburb %}{{ profile.user.suburb }}{% endif %}
+                            {% if profile.user.postcode %} ({{ profile.user.postcode }}){% endif %}
+                            {% if not profile.user.suburb and not profile.user.postcode %}Location not set{% endif %}
                         </p>
                     </div>
 
@@ -45,81 +40,94 @@
 
                     <!-- View mode -->
                     <div id="view-mode">
+                        <div class="row text-center g-3 my-2">
+                            <div class="col-6">
+                                <div class="profile-stat">
+                                    {% set num_children = profile.children|length if profile.children else 0 %}
+                                    <div class="profile-stat-value">{{ num_children if num_children > 0 else "–" }}</div>
+                                    <div class="profile-stat-label">{{ 'child' if num_children == 1 else 'children' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value">
+                                        {% if profile.about %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--bs-success)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                        </svg>
+                                        {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--bs-secondary)" class="bi bi-dash-circle" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                            <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+                                        </svg>
+                                        {% endif %}
+                                    </div>
+                                    <div class="profile-stat-label">family notes</div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Children list -->
                         {% if profile.children %}
+                        <hr>
                         <div class="mb-3">
-                            <p class="fw-semibold mb-2">{{ 'Child' if profile.children|length == 1 else 'Children' }}</p>
+                            <p class="fw-semibold mb-2">Children</p>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for child in profile.children %}
-                                <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
-                                    {{ child.name or 'Child' }}{% if child.age is not none %}, {{ child.age }} yr{{ 's' if child.age != 1 else '' }}{% endif %}
+                                <span class="badge bg-info text-dark px-3 py-2">
+                                    {{ child.name }}, age {{ child.age }}
                                 </span>
                                 {% endfor %}
                             </div>
                         </div>
                         {% endif %}
 
+                        <!-- About -->
                         {% if profile.about %}
                         <div class="mb-3">
-                            <p class="fw-semibold mb-1">About</p>
+                            <p class="fw-semibold mb-1">About the Family</p>
                             <p class="text-muted">{{ profile.about }}</p>
                         </div>
                         {% endif %}
 
-                        {% if profile.user.latitude and profile.user.longitude %}
-                        <div class="mb-3">
-                            <p class="fw-semibold mb-2">Location</p>
-                            <div id="profile-map"
-                                 data-lat="{{ profile.user.latitude }}"
-                                 data-lng="{{ profile.user.longitude }}"
-                                 style="height:200px;border-radius:8px;overflow:hidden;"></div>
-                        </div>
-                        {% endif %}
-
-                        {% if current_user.is_babysitter %}
                         <div class="d-flex gap-2 mt-4">
+                            {% if is_own %}
+                            <button type="button" class="btn btn-outline-primary flex-fill" id="edit-btn">Edit Profile</button>
+                            {% endif %}
+                            {% if current_user.is_babysitter %}
                             <a href="{{ url_for('messages.index') }}" class="btn btn-primary flex-fill">Message</a>
+                            {% endif %}
                         </div>
-                        {% endif %}
-
                     </div>
 
-                    <!-- Edit form (own profile only, hidden by default) -->
+                    <!-- Edit mode -->
                     {% if is_own %}
-                    <form id="edit-form"
-                          method="POST"
-                          action="{{ url_for('main.parent_profile_edit', profile_id=profile.id) }}"
-                          class="d-none">
+                    <form method="POST" action="{{ url_for('main.parent_profile_edit', profile_id=profile.id) }}" id="edit-form" class="d-none">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="children_json" id="children_json_input"
+                               value="{{ profile.children | tojson if profile.children else '[]' }}">
 
-                        <div class="mb-3 position-relative">
-                            <label class="form-label fw-semibold">Suburb / Postcode</label>
-                            <input type="text" id="location-search" class="form-control"
-                                   placeholder="Start typing suburb or postcode…" autocomplete="off"
-                                   value="{{ (profile.user.suburb ~ ' (' ~ profile.user.postcode ~ ')') if profile.user.suburb and profile.user.postcode else (profile.user.suburb or profile.user.postcode or '') }}">
-                            <ul id="location-dropdown"
-                                class="list-group position-absolute w-100 shadow"
-                                style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
-                            <input type="hidden" id="suburb" name="suburb" value="{{ profile.user.suburb or '' }}">
-                            <input type="hidden" id="postcode" name="postcode" value="{{ profile.user.postcode or '' }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">About the Family</label>
+                            <textarea name="about" class="form-control" rows="4"
+                                      placeholder="Any notes for babysitters, allergies, special needs…">{{ profile.about or '' }}</textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Children</label>
-                            <div id="children-list" class="d-flex flex-column gap-2 mb-2"></div>
-                            <button type="button" id="add-child" class="btn btn-outline-secondary btn-sm">+ Add child</button>
-                            <input type="hidden" id="children-json" name="children_json">
+                            <label class="form-label fw-semibold">Suburb</label>
+                            <input type="text" name="suburb" class="form-control"
+                                   value="{{ profile.user.suburb or '' }}" placeholder="e.g. Subiaco">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">About</label>
-                            <textarea name="about" class="form-control" rows="3"
-                                      placeholder="Allergies, routines, anything sitters should know…">{{ profile.about or '' }}</textarea>
+                            <label class="form-label fw-semibold">Postcode</label>
+                            <input type="text" name="postcode" class="form-control"
+                                   value="{{ profile.user.postcode or '' }}" placeholder="e.g. 6008">
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
                             <button type="submit" class="btn btn-primary flex-fill">Save</button>
-                            <button id="cancel-edit" type="button" class="btn btn-outline-secondary flex-fill">Cancel</button>
+                            <button type="button" class="btn btn-outline-secondary flex-fill" id="cancel-btn">Cancel</button>
                         </div>
                     </form>
                     {% endif %}
@@ -133,13 +141,16 @@
 {% endblock %}
 
 {% block scripts %}
-{% if profile.user.latitude and profile.user.longitude %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
-{% endif %}
 {% if is_own %}
-<script>window._parentChildren = {{ profile.children | tojson }};</script>
-<script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
-<script src="{{ url_for('static', filename='js/parent-profile.js') }}"></script>
+<script>
+    document.getElementById('edit-btn').addEventListener('click', function () {
+        document.getElementById('view-mode').classList.add('d-none');
+        document.getElementById('edit-form').classList.remove('d-none');
+    });
+    document.getElementById('cancel-btn').addEventListener('click', function () {
+        document.getElementById('edit-form').classList.add('d-none');
+        document.getElementById('view-mode').classList.remove('d-none');
+    });
+</script>
 {% endif %}
 {% endblock %}
