@@ -211,7 +211,52 @@ def babysitter_profile(profile_id):
     profile = BabysitterProfile.query.get_or_404(profile_id)
     import json
     days = json.loads(profile.availability) if profile.availability else []
-    return render_template("babysitter_profile.html", profile=profile, days=days)
+    is_own = current_user.is_babysitter and current_user.babysitter_profile.id == profile_id
+    return render_template("babysitter_profile.html", profile=profile, days=days, is_own=is_own)
+
+
+@main_bp.route("/babysitter/<int:profile_id>/edit", methods=["POST"])
+@login_required
+def babysitter_profile_edit(profile_id):
+    profile = BabysitterProfile.query.get_or_404(profile_id)
+    if not current_user.is_babysitter or current_user.babysitter_profile.id != profile_id:
+        abort(403)
+
+    bio = request.form.get("bio", "").strip() or None
+    hourly_rate = request.form.get("hourly_rate", type=float)
+    experience_years = request.form.get("experience_years", type=int)
+    availability_days = request.form.getlist("availability")
+
+    if hourly_rate is not None and not (0 <= hourly_rate <= 200):
+        flash("Hourly rate must be between 0 and 200.", "danger")
+        return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
+
+    if experience_years is not None and not (0 <= experience_years <= 50):
+        flash("Experience years must be between 0 and 50.", "danger")
+        return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
+
+    profile.bio = bio
+    profile.hourly_rate = hourly_rate
+    profile.experience_years = experience_years
+    profile.availability = json.dumps(availability_days) if availability_days else None
+
+    suburb = request.form.get("suburb", "").strip() or None
+    postcode = request.form.get("postcode", "").strip() or None
+
+    if postcode and postcode not in POSTCODE_SUBURB:
+        flash("Invalid postcode. Please choose from the supported suburbs.", "danger")
+        return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
+
+    if suburb != current_user.suburb or postcode != current_user.postcode:
+        current_user.suburb = suburb
+        current_user.postcode = postcode
+        lat, lng = geocode_suburb(suburb, postcode)
+        current_user.latitude = lat
+        current_user.longitude = lng
+
+    db.session.commit()
+    flash("Profile updated.", "success")
+    return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
 
 
 @main_bp.route("/parent/<int:profile_id>")
