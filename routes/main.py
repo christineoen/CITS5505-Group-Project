@@ -237,10 +237,20 @@ def parent_profile_edit(profile_id):
             children = []
     except (ValueError, TypeError):
         children = []
+
+    if len(children) > 20:
+        flash("Number of children must be between 1 and 20.", "danger")
+        return redirect(url_for("main.parent_profile", profile_id=profile_id))
+
     profile.children = children
 
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
+
+    if postcode and postcode not in POSTCODE_SUBURB:
+        flash("Invalid postcode. Please choose from the supported suburbs.", "danger")
+        return redirect(url_for("main.parent_profile", profile_id=profile_id))
+
     if suburb != current_user.suburb or postcode != current_user.postcode:
         current_user.suburb = suburb
         current_user.postcode = postcode

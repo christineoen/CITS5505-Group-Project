@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-{% endblock %}
-
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -25,7 +21,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
                                 <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                             </svg>
-                            {{ profile.user.suburb or profile.user.postcode or "Location not set" }}
+                            {% if profile.user.suburb %}{{ profile.user.suburb }}{% endif %}
+                            {% if profile.user.postcode %} ({{ profile.user.postcode }}){% endif %}
+                            {% if not profile.user.suburb and not profile.user.postcode %}Location not set{% endif %}
                         </p>
                     </div>
 
@@ -79,17 +77,6 @@
                     </div>
                     {% endif %}
 
-                    <!-- Location map -->
-                    {% if profile.user.latitude and profile.user.longitude %}
-                    <div class="mb-3">
-                        <p class="fw-semibold mb-2">Location</p>
-                        <div id="profile-map"
-                             data-lat="{{ profile.user.latitude }}"
-                             data-lng="{{ profile.user.longitude }}"
-                             style="height:200px;border-radius:8px;overflow:hidden;"></div>
-                    </div>
-                    {% endif %}
-
                     <!-- Actions -->
                     <div class="d-flex gap-2 mt-4">
                         {% if current_user.is_parent %}
@@ -104,11 +91,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-{% if profile.user.latitude and profile.user.longitude %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
-{% endif %}
 {% endblock %}
