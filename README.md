@@ -19,12 +19,12 @@ The application is built with a client-server architecture using Flask on the ba
 
 ## Group Members
 
-| UWA ID | Name | GitHub Username |
-|--------|------|-----------------|
-| TODO   | TODO | TODO            |
-| TODO   | TODO | TODO            |
-| TODO   | TODO | TODO            |
-| TODO   | TODO | TODO            |
+| UWA ID    | Name            | GitHub Username |
+|-----------|-----------------|-----------------|
+| 24728174  | Christine Oen   | Christineoen    |
+| 24351499  | DongSheng Li    | BenjaninLi-uw   |
+| 24320547  | Huilin Tang     | KaylinTang      |
+| 22860294  | Xin Chang       | XinChang-wa     |
 
 ---
 
