@@ -20,52 +20,33 @@
     "Sat": 6, "Saturday": 6
   };
 
-  // Debug: Log available days
-  console.log("Available days from backend:", window.availableDays);
-  
-  // Convert available days to numbers
+  // Convert available days to JS day numbers
   const availableDayNumbers = (window.availableDays || []).map(day => dayNameToNumber[day]);
-  
-  console.log("Available day numbers (JS getDay format):", availableDayNumbers);
 
   // Initialize Flatpickr date picker
-  if (dateInput && typeof flatpickr !== 'undefined') {
+  if (dateInput && typeof flatpickr !== "undefined") {
     flatpickr(dateInput, {
       minDate: window.todayDate || "today",
       dateFormat: "Y-m-d",
       disable: [
         function(date) {
-          // Disable dates that are not in the available days
           if (!availableDayNumbers || availableDayNumbers.length === 0) {
-            console.log("No availability specified, allowing all dates");
-            return false; // Don't disable any dates if no availability specified
+            return false;
           }
-          
-          const dayOfWeek = date.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
-          const shouldDisable = !availableDayNumbers.includes(dayOfWeek);
-          
-          return shouldDisable;
+          return !availableDayNumbers.includes(date.getDay());
         }
       ],
       locale: {
-        firstDayOfWeek: 1 // Start week on Monday
+        firstDayOfWeek: 1
       },
       onReady: function(selectedDates, dateStr, instance) {
-        // Add custom styling
         instance.calendarContainer.style.boxShadow = "0 0.5rem 1rem rgba(0, 0, 0, 0.15)";
-        console.log("Flatpickr initialized successfully");
-        console.log("Will enable days:", availableDayNumbers, "which are:", (window.availableDays || []).join(", "));
       }
-    });
-  } else {
-    console.error("Flatpickr not initialized:", {
-      dateInput: !!dateInput,
-      flatpickrLoaded: typeof flatpickr !== 'undefined'
     });
   }
 
   function validateStartTime() {
-    if (!startTimeInput.value) return true; // let server handle required
+    if (!startTimeInput.value) return true;
     const [hours, minutes] = startTimeInput.value.split(":").map(Number);
     const totalMinutes = hours * 60 + (minutes || 0);
     const valid = totalMinutes >= 6 * 60 && totalMinutes <= 22 * 60;
@@ -91,7 +72,6 @@
     const timeOk = validateStartTime();
     const durOk = validateDuration();
     const dateOk = dateInput.value !== "";
-    
     if (!dateOk || !timeOk || !durOk) {
       e.preventDefault();
       if (!dateOk) {

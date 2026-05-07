@@ -182,15 +182,8 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-  // Pass available days and today's date from backend to JavaScript
   window.availableDays = {{ available_days | tojson | safe }};
   window.todayDate = "{{ today.isoformat() }}";
-  
-  // Debug output
-  console.log("Backend data:", {
-    availableDays: window.availableDays,
-    todayDate: window.todayDate
-  });
 </script>
 <script src="{{ url_for('static', filename='js/booking.js') }}"></script>
 {% endblock %}
