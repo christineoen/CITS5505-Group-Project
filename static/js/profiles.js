@@ -74,6 +74,25 @@ if (searchInput) {
     });
 }
 
+// Profile edit/cancel toggle
+const editBtn   = document.getElementById('edit-btn');
+const cancelBtn = document.getElementById('cancel-btn');
+const viewMode  = document.getElementById('view-mode');
+const editForm  = document.getElementById('edit-form');
+
+if (editBtn) {
+    editBtn.addEventListener('click', function () {
+        viewMode.classList.add('d-none');
+        editForm.classList.remove('d-none');
+    });
+}
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', function () {
+        editForm.classList.add('d-none');
+        viewMode.classList.remove('d-none');
+    });
+}
+
 // Children dynamic form — parent setup only; no-ops silently on sitter page
 const addBtn      = document.getElementById('add-child');
 const childList   = document.getElementById('children-list');
