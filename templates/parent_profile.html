@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -40,53 +44,38 @@
 
                     <!-- View mode -->
                     <div id="view-mode">
-                        <div class="row text-center g-3 my-2">
-                            <div class="col-6">
-                                <div class="profile-stat">
-                                    {% set num_children = profile.children|length if profile.children else 0 %}
-                                    <div class="profile-stat-value">{{ num_children if num_children > 0 else "–" }}</div>
-                                    <div class="profile-stat-label">{{ 'child' if num_children == 1 else 'children' }}</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="profile-stat">
-                                    <div class="profile-stat-value">
-                                        {% if profile.about %}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--bs-success)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                        </svg>
-                                        {% else %}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--bs-secondary)" class="bi bi-dash-circle" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                                            <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
-                                        </svg>
-                                        {% endif %}
-                                    </div>
-                                    <div class="profile-stat-label">family notes</div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Children list -->
                         {% if profile.children %}
-                        <hr>
                         <div class="mb-3">
                             <p class="fw-semibold mb-2">Children</p>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for child in profile.children %}
                                 <span class="badge bg-info text-dark px-3 py-2">
-                                    {{ child.name }}, age {{ child.age }}
+                                    {{ child.name }}{% if child.age is not none %}, age {{ child.age }}{% endif %}
                                 </span>
                                 {% endfor %}
                             </div>
                         </div>
                         {% endif %}
 
-                        <!-- About -->
                         {% if profile.about %}
                         <div class="mb-3">
                             <p class="fw-semibold mb-1">About the Family</p>
-                            <p class="text-muted">{{ profile.about }}</p>
+                            <p class="text-muted mb-0">{{ profile.about }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if not profile.children and not profile.about %}
+                        <p class="text-muted small">No profile details added yet.</p>
+                        {% endif %}
+
+                        {% if profile.user.latitude and profile.user.longitude %}
+                        <div class="mb-3 mt-3">
+                            <p class="fw-semibold mb-2">Location</p>
+                            <div id="profile-map"
+                                 data-lat="{{ profile.user.latitude }}"
+                                 data-lng="{{ profile.user.longitude }}"
+                                 style="height:200px;border-radius:8px;overflow:hidden;"></div>
                         </div>
                         {% endif %}
 
@@ -104,8 +93,14 @@
                     {% if is_own %}
                     <form method="POST" action="{{ url_for('main.parent_profile_edit', profile_id=profile.id) }}" id="edit-form" class="d-none">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="children_json" id="children_json_input"
-                               value="{{ profile.children | tojson if profile.children else '[]' }}">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Children</label>
+                            <div id="children-list" class="d-flex flex-column gap-2 mb-2"></div>
+                            <button type="button" id="add-child" class="btn btn-outline-secondary btn-sm">+ Add child</button>
+                            <input type="hidden" name="children_json" id="children-json"
+                                   value='{{ (profile.children or []) | tojson }}'>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">About the Family</label>
@@ -113,16 +108,16 @@
                                       placeholder="Any notes for babysitters, allergies, special needs…">{{ profile.about or '' }}</textarea>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Suburb</label>
-                            <input type="text" name="suburb" class="form-control"
-                                   value="{{ profile.user.suburb or '' }}" placeholder="e.g. Subiaco">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Postcode</label>
-                            <input type="text" name="postcode" class="form-control"
-                                   value="{{ profile.user.postcode or '' }}" placeholder="e.g. 6008">
+                        <div class="mb-3 position-relative">
+                            <label class="form-label fw-semibold">Suburb / Postcode</label>
+                            <input type="text" id="location-search" class="form-control"
+                                   placeholder="Start typing suburb or postcode…" autocomplete="off"
+                                   value="{{ (profile.user.suburb ~ ' (' ~ profile.user.postcode ~ ')') if profile.user.suburb and profile.user.postcode else (profile.user.suburb or profile.user.postcode or '') }}">
+                            <ul id="location-dropdown"
+                                class="list-group position-absolute w-100 shadow"
+                                style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
+                            <input type="hidden" id="suburb" name="suburb" value="{{ profile.user.suburb or '' }}">
+                            <input type="hidden" id="postcode" name="postcode" value="{{ profile.user.postcode or '' }}">
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
@@ -141,16 +136,11 @@
 {% endblock %}
 
 {% block scripts %}
+{% if profile.user.latitude and profile.user.longitude %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
+{% endif %}
 {% if is_own %}
-<script>
-    document.getElementById('edit-btn').addEventListener('click', function () {
-        document.getElementById('view-mode').classList.add('d-none');
-        document.getElementById('edit-form').classList.remove('d-none');
-    });
-    document.getElementById('cancel-btn').addEventListener('click', function () {
-        document.getElementById('edit-form').classList.add('d-none');
-        document.getElementById('view-mode').classList.remove('d-none');
-    });
-</script>
+<script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
 {% endif %}
 {% endblock %}

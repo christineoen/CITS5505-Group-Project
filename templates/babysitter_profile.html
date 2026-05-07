@@ -1,12 +1,25 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
 
             <a href="{{ url_for('main.index') }}" class="text-muted small d-inline-block mb-3">← Back to listings</a>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endwith %}
 
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
@@ -29,61 +42,133 @@
 
                     <hr>
 
-                    <!-- Stats row -->
-                    <div class="row text-center g-3 my-2">
-                        <div class="col-4">
-                            <div class="profile-stat">
-                                <div class="profile-stat-value">${{ "%.0f"|format(profile.hourly_rate) if profile.hourly_rate else "–" }}</div>
-                                <div class="profile-stat-label">per hour</div>
+                    <!-- View mode -->
+                    <div id="view-mode">
+                        <div class="row text-center g-3 my-2">
+                            <div class="col-4">
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value">${{ "%.0f"|format(profile.hourly_rate) if profile.hourly_rate else "–" }}</div>
+                                    <div class="profile-stat-label">per hour</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value">{{ profile.experience_years if profile.experience_years is not none else "–" }}</div>
+                                    <div class="profile-stat-label">yrs experience</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value">{{ days|length if days else "–" }}</div>
+                                    <div class="profile-stat-label">days available</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="profile-stat">
-                                <div class="profile-stat-value">{{ profile.experience_years if profile.experience_years is not none else "–" }}</div>
-                                <div class="profile-stat-label">yrs experience</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="profile-stat">
-                                <div class="profile-stat-value">{{ days|length if days else "–" }}</div>
-                                <div class="profile-stat-label">days available</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <hr>
+                        <hr>
 
-                    <!-- Availability -->
-                    <div class="mb-3">
-                        <p class="fw-semibold mb-2">Availability</p>
-                        {% if days %}
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for day in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
-                            <span class="badge rounded-pill px-3 py-2 {% if day in days %}bg-primary{% else %}bg-light text-secondary border{% endif %}">
-                                {{ day }}
-                            </span>
-                            {% endfor %}
+                        <!-- Availability -->
+                        <div class="mb-3">
+                            <p class="fw-semibold mb-2">Availability</p>
+                            {% if days %}
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for day in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
+                                <span class="badge rounded-pill px-3 py-2 {% if day in days %}bg-primary{% else %}bg-light text-secondary border{% endif %}">
+                                    {{ day }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted small">No availability set.</p>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <p class="text-muted small">No availability set.</p>
+
+                        <!-- Bio -->
+                        {% if profile.bio %}
+                        <div class="mb-3">
+                            <p class="fw-semibold mb-1">About</p>
+                            <p class="text-muted">{{ profile.bio }}</p>
+                        </div>
                         {% endif %}
+
+                        <!-- Location map -->
+                        {% if profile.user.latitude and profile.user.longitude %}
+                        <div class="mb-3">
+                            <p class="fw-semibold mb-2">Location</p>
+                            <div id="profile-map"
+                                 data-lat="{{ profile.user.latitude }}"
+                                 data-lng="{{ profile.user.longitude }}"
+                                 style="height:200px;border-radius:8px;overflow:hidden;"></div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2 mt-4">
+                            {% if is_own %}
+                            <button type="button" class="btn btn-outline-primary flex-fill" id="edit-btn">Edit Profile</button>
+                            {% endif %}
+                            {% if current_user.is_parent %}
+                            <a href="{{ url_for('main.booking', babysitter_id=profile.id) }}" class="btn btn-primary flex-fill">Book Now</a>
+                            <a href="{{ url_for('messages.index') }}" class="btn btn-outline-primary flex-fill">Message</a>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <!-- Bio -->
-                    {% if profile.bio %}
-                    <div class="mb-3">
-                        <p class="fw-semibold mb-1">About</p>
-                        <p class="text-muted">{{ profile.bio }}</p>
-                    </div>
+                    <!-- Edit mode -->
+                    {% if is_own %}
+                    <form method="POST" action="{{ url_for('main.babysitter_profile_edit', profile_id=profile.id) }}" id="edit-form" class="d-none">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Bio</label>
+                            <textarea name="bio" class="form-control" rows="4"
+                                      placeholder="Tell parents about your experience…">{{ profile.bio or '' }}</textarea>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Hourly Rate ($)</label>
+                                <input type="number" name="hourly_rate" class="form-control" min="0" max="200" step="0.5"
+                                       value="{{ profile.hourly_rate or '' }}" placeholder="e.g. 25">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Years of Experience</label>
+                                <input type="number" name="experience_years" class="form-control" min="0" max="50"
+                                       value="{{ profile.experience_years or '' }}" placeholder="e.g. 3">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Availability</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for day in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="availability" value="{{ day }}"
+                                           id="edit-day-{{ day }}" {% if day in days %}checked{% endif %}>
+                                    <label class="form-check-label" for="edit-day-{{ day }}">{{ day }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3 position-relative">
+                            <label class="form-label fw-semibold">Suburb / Postcode</label>
+                            <input type="text" id="location-search" class="form-control"
+                                   placeholder="Start typing suburb or postcode…" autocomplete="off"
+                                   value="{{ (profile.user.suburb ~ ' (' ~ profile.user.postcode ~ ')') if profile.user.suburb and profile.user.postcode else (profile.user.suburb or profile.user.postcode or '') }}">
+                            <ul id="location-dropdown"
+                                class="list-group position-absolute w-100 shadow"
+                                style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
+                            <input type="hidden" id="suburb" name="suburb" value="{{ profile.user.suburb or '' }}">
+                            <input type="hidden" id="postcode" name="postcode" value="{{ profile.user.postcode or '' }}">
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary flex-fill">Save</button>
+                            <button type="button" class="btn btn-outline-secondary flex-fill" id="cancel-btn">Cancel</button>
+                        </div>
+                    </form>
                     {% endif %}
-
-                    <!-- Actions -->
-                    <div class="d-flex gap-2 mt-4">
-                        {% if current_user.is_parent %}
-                        <a href="{{ url_for('main.booking', babysitter_id=profile.id) }}" class="btn btn-primary flex-fill">Book Now</a>
-                        <a href="{{ url_for('messages.index') }}" class="btn btn-outline-primary flex-fill">Message</a>
-                        {% endif %}
-                    </div>
 
                 </div>
             </div>
@@ -91,4 +176,14 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if profile.user.latitude and profile.user.longitude %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
+{% endif %}
+{% if is_own %}
+<script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
+{% endif %}
 {% endblock %}

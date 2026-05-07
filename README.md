@@ -1,5 +1,12 @@
 # SitBuddy - Babysitting Connection Platform
 
+| UWA ID    | Name            | GitHub Username |
+|-----------|-----------------|-----------------|
+| 24728174  | Christine Oen   | Christineoen    |
+| 24351499  | DongSheng Li    | BenjaninLi-uw   |
+| 24320547  | Huilin Tang     | KaylinTang      |
+| 22860294  | Xin Chang       | XinChang-wa     |
+
 ## Overview
 
 SitBuddy is a modern web application that connects parents with qualified babysitters in their local area. Built with Flask and featuring a comprehensive messaging system, SitBuddy makes finding and booking childcare simple and secure.
