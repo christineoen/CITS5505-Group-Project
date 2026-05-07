@@ -65,12 +65,26 @@ def booking(babysitter_id):
         return redirect(url_for("main.index"))
 
     parent = current_user.parent_profile
+    
+    # Get today's date for min date restriction
+    today = datetime.now().date()
+    
+    # Get babysitter's available days
+    available_days = json.loads(babysitter.availability) if babysitter.availability else []
 
     form = BookingForm()
     if form.validate_on_submit():
         req_date = form.date.data
         req_start = form.start_time.data
         req_duration = form.duration_hours.data
+
+        # Validate that the selected date matches babysitter's availability
+        if available_days:
+            day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            selected_day_name = day_names[req_date.weekday()]
+            if selected_day_name not in available_days:
+                flash(f"This babysitter is not available on {selected_day_name}. Available days: {', '.join(available_days)}", "danger")
+                return render_template("booking.html", babysitter=babysitter, form=form, today=today, available_days=available_days)
 
         # Check for conflicting bookings for this parent (pending or accepted)
         existing = Booking.query.filter(
@@ -86,7 +100,7 @@ def booking(babysitter_id):
 
         if conflict:
             flash("You already have a pending or accepted booking that overlaps with this time slot.", "danger")
-            return render_template("booking.html", babysitter=babysitter, form=form)
+            return render_template("booking.html", babysitter=babysitter, form=form, today=today, available_days=available_days)
 
         new_booking = Booking(
             parent_id=parent.id,
@@ -94,13 +108,14 @@ def booking(babysitter_id):
             date=req_date,
             start_time=req_start,
             duration_hours=req_duration,
+            notes=form.notes.data,
         )
         db.session.add(new_booking)
         db.session.commit()
         flash(f"Booking request sent to {babysitter.user.name}!", "success")
         return redirect(url_for("main.bookings"))
 
-    return render_template("booking.html", babysitter=babysitter, form=form)
+    return render_template("booking.html", babysitter=babysitter, form=form, today=today, available_days=available_days)
 
 
 @main_bp.route("/bookings")
