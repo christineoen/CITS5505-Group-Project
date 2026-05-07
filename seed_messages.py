@@ -1,6 +1,6 @@
 """
-Seed data script - Creates test booking and message data
-Make sure you have user data before running this script
+Seed Messages Script - Creates test booking and message data
+Ensure you have user data before running this script
 """
 from app import create_app
 from models import db
@@ -11,14 +11,16 @@ from models.booking import Booking
 from models.message import Message
 from datetime import datetime, date, time, timedelta
 
+
 def seed_bookings_and_messages():
+    """Create sample bookings and messages for testing"""
     app = create_app()
     with app.app_context():
-        # Get some users
+        # Get existing users
         users = User.query.all()
         
         if len(users) < 2:
-            print("Need at least 2 users to create bookings. Please run seed.py first to create users.")
+            print("Need at least 2 users to create bookings. Please run seed.py first.")
             return
         
         # Find parent and babysitter profiles
@@ -26,7 +28,7 @@ def seed_bookings_and_messages():
         babysitter_profile = BabysitterProfile.query.first()
         
         if not parent_profile or not babysitter_profile:
-            print("Need at least one parent profile and one babysitter profile. Please create profiles first.")
+            print("Need at least one parent and one babysitter profile. Please create profiles first.")
             return
         
         parent = parent_profile.user
@@ -34,7 +36,7 @@ def seed_bookings_and_messages():
         
         print(f"Creating booking: Parent={parent.name}, Babysitter={babysitter.name}")
         
-        # Create several bookings
+        # Sample booking data
         bookings_data = [
             {
                 "parent_id": parent_profile.id,
@@ -83,7 +85,7 @@ def seed_bookings_and_messages():
             start_datetime = datetime.combine(booking.date, booking.start_time)
             end_datetime = start_datetime + timedelta(hours=booking.duration_hours)
             
-            # Create some messages for each booking
+            # Create sample messages for each booking
             messages_data = [
                 {
                     "booking_id": booking.id,
@@ -100,24 +102,29 @@ def seed_bookings_and_messages():
                 {
                     "booking_id": booking.id,
                     "sender_id": parent.id,
-                    "content": f"Great! How about {booking.date} from {booking.start_time.strftime('%H:%M')} to {end_datetime.strftime('%H:%M')}?",
+                    "content": (
+                        f"Great! How about {booking.date} from "
+                        f"{booking.start_time.strftime('%H:%M')} to {end_datetime.strftime('%H:%M')}?"
+                    ),
                     "created_at": datetime.now() - timedelta(hours=22)
                 }
             ]
             
             if booking.status == "accepted":
-                messages_data.append({
-                    "booking_id": booking.id,
-                    "sender_id": babysitter.id,
-                    "content": "Booking has been accepted.",
-                    "created_at": datetime.now() - timedelta(hours=21)
-                })
-                messages_data.append({
-                    "booking_id": booking.id,
-                    "sender_id": babysitter.id,
-                    "content": "Perfect! I'll see you then. Looking forward to it!",
-                    "created_at": datetime.now() - timedelta(hours=20)
-                })
+                messages_data.extend([
+                    {
+                        "booking_id": booking.id,
+                        "sender_id": babysitter.id,
+                        "content": "Booking has been accepted.",
+                        "created_at": datetime.now() - timedelta(hours=21)
+                    },
+                    {
+                        "booking_id": booking.id,
+                        "sender_id": babysitter.id,
+                        "content": "Perfect! I'll see you then. Looking forward to it!",
+                        "created_at": datetime.now() - timedelta(hours=20)
+                    }
+                ])
             
             # Only add messages that don't exist
             for msg_data in messages_data:
@@ -133,8 +140,8 @@ def seed_bookings_and_messages():
         
         db.session.commit()
         print("✅ Booking and message data created successfully!")
-        print(f"Total bookings created: {Booking.query.count()}")
-        print(f"Total messages created: {Message.query.count()}")
+        print(f"Total bookings: {Booking.query.count()}")
+        print(f"Total messages: {Message.query.count()}")
 
 
 if __name__ == "__main__":

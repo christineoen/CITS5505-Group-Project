@@ -3,70 +3,121 @@
 {% block title %}Messages - SitBuddy{% endblock %}
 
 {% block content %}
-<div class="row h-100">
-    <!-- Left side: Conversation list -->
-    <div class="col-md-4 border-end">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">Messages</h4>
-        </div>
-        
-        <div id="conversations-list">
-            <div class="text-center text-muted py-5">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
+<!-- CSRF Token for JavaScript -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<div class="messages-layout">
+    <div class="row h-100 g-0">
+        <!-- Left side: Conversation list -->
+        <div class="col-md-4 conversations-sidebar">
+            <div class="p-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Messages</h4>
+                    <div class="role-indicator {{ 'parent' if current_user.is_parent else 'babysitter' }}">
+                        {{ 'Parent' if current_user.is_parent else 'Babysitter' }}
+                    </div>
                 </div>
-                <p class="mt-2">Loading conversations...</p>
+            </div>
+            
+            <div id="conversations-list" class="flex-fill">
+                <div class="empty-state">
+                    <div class="loading-spinner"></div>
+                    <div class="empty-state-title mt-3">Loading conversations...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side: Message details -->
+        <div class="col-md-8 conversation-main">
+            <div id="no-conversation-selected" class="empty-state h-100 d-flex flex-column justify-content-center">
+                <div class="empty-state-icon">💬</div>
+                <div class="empty-state-title">Select a conversation</div>
+                <div class="empty-state-text">Choose a conversation from the list to view messages and manage booking requests</div>
+            </div>
+
+            <div id="conversation-view" class="d-none h-100 d-flex flex-column">
+                <!-- Enhanced conversation header -->
+                <div class="chat-header">
+                    <div class="d-flex align-items-center">
+                        <div class="chat-header-avatar bg-primary me-3">
+                            <span id="other-user-initial"></span>
+                        </div>
+                        <div class="chat-header-info">
+                            <div class="chat-header-name" id="other-user-name"></div>
+                            <div class="chat-header-details">
+                                <span id="booking-info"></span>
+                                <span class="status-badge ms-2" id="booking-status-badge"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Role-specific action area -->
+                        <div class="ms-auto">
+                            <!-- Parent view (read-only) -->
+                            <div id="parent-view" class="d-none">
+                                <div class="text-end">
+                                    <div class="small text-muted">Booking Request Status</div>
+                                    <div id="parent-status-text" class="fw-bold"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Babysitter view (with actions) -->
+                            <div id="babysitter-actions" class="d-none">
+                                <div class="booking-actions">
+                                    <button class="action-btn accept" id="accept-btn" onclick="updateBookingStatus('accepted')">
+                                        <span>✓</span> Accept
+                                    </button>
+                                    <button class="action-btn reject" id="reject-btn" onclick="updateBookingStatus('rejected')">
+                                        <span>✗</span> Reject
+                                    </button>
+                                    <button class="action-btn pending" id="pending-btn" onclick="keepPending()">
+                                        <span>⏳</span> Keep Pending
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message list with enhanced styling -->
+                <div id="messages-container">
+                    <!-- Messages will be dynamically loaded via JavaScript -->
+                </div>
+
+                <!-- Enhanced message input area -->
+                <div class="message-input-area">
+                    <form id="send-message-form" class="message-input-form">
+                        <textarea 
+                            id="message-input" 
+                            class="message-input" 
+                            placeholder="Type a message..." 
+                            rows="1"
+                            required></textarea>
+                        <button type="submit" class="send-button" id="send-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Right side: Message details -->
-    <div class="col-md-8">
-        <div id="no-conversation-selected" class="text-center text-muted py-5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-chat-dots mb-3" viewBox="0 0 16 16">
-                <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
-                <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9 9 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.4 10.4 0 0 1-.524 2.318l-.003.011a11 11 0 0 1-.244.637c-.079.186.074.394.273.362a22 22 0 0 0 .693-.125m.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8 8 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a11 11 0 0 0 .398-2"/>
-            </svg>
-            <h5>Select a conversation</h5>
-            <p>Choose a conversation from the list to view messages</p>
-        </div>
-
-        <div id="conversation-view" class="d-none">
-            <!-- Conversation header -->
-            <div class="border-bottom pb-3 mb-3">
-                <div class="d-flex align-items-center">
-                    <div class="avatar-circle bg-primary me-3" style="width:48px;height:48px;font-size:1.2rem;">
-                        <span id="other-user-initial"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h5 class="mb-0" id="other-user-name"></h5>
-                        <small class="text-muted">
-                            <span id="booking-info"></span>
-                            <span class="badge ms-2" id="booking-status-badge"></span>
-                        </small>
-                    </div>
-                    <div id="booking-actions" class="d-none">
-                        <button class="btn btn-success btn-sm me-2" onclick="updateBookingStatus('accepted')">Accept</button>
-                        <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('rejected')">Reject</button>
-                    </div>
-                </div>
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-            <!-- Message list -->
-            <div id="messages-container" style="height: 400px; overflow-y: auto;" class="mb-3">
-                <!-- Messages will be dynamically loaded via JavaScript -->
+            <div class="modal-body" id="confirmationModalBody">
+                <!-- Dynamic content -->
             </div>
-
-            <!-- Send message form -->
-            <div class="border-top pt-3">
-                <form id="send-message-form" class="d-flex gap-2">
-                    <input type="text" id="message-input" class="form-control" placeholder="Type a message..." required>
-                    <button type="submit" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
-                            <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
-                        </svg>
-                    </button>
-                </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmActionBtn">Confirm</button>
             </div>
         </div>
     </div>
