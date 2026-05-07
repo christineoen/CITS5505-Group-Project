@@ -78,14 +78,6 @@ def booking(babysitter_id):
         req_start = form.start_time.data
         req_duration = form.duration_hours.data
 
-        # Validate that the selected date matches babysitter's availability
-        if available_days:
-            day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-            selected_day_name = day_names[req_date.weekday()]
-            if selected_day_name not in available_days:
-                flash(f"This babysitter is not available on {selected_day_name}. Available days: {', '.join(available_days)}", "danger")
-                return render_template("booking.html", babysitter=babysitter, form=form, today=today, available_days=available_days)
-
         # Check for conflicting bookings for this parent (pending or accepted)
         existing = Booking.query.filter(
             Booking.parent_id == parent.id,
