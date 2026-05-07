@@ -1,23 +1,4 @@
-# CITS5505 Group Project - SitBuddy
-
-## Purpose
-
-SitBuddy is a web application that connects parents with babysitters in their local area.
-
-Parents can browse babysitter profiles, compare availability and experience, send booking requests, and communicate through an integrated messaging system. Babysitters can create a profile showcasing their skills and credentials, manage incoming booking requests, and engage in real-time conversations with parents.
-
-The application is built with a client-server architecture using Flask on the backend, SQLite for data persistence via SQLAlchemy, and Bootstrap for the frontend. Users must register and log in to access the platform, and all user data is persisted between sessions.
-
-### Key Features
-- 👤 **User Authentication**: Secure login and registration system
-- 🔍 **Profile Browsing**: Search and filter babysitters by location and availability
-- 💬 **Messaging System**: Real-time communication between parents and babysitters
-- 📅 **Booking Management**: Create, accept, and manage babysitting bookings
-- 🎨 **Responsive Design**: Mobile-friendly interface using Bootstrap 5
-
----
-
-## Group Members
+# SitBuddy - Babysitting Connection Platform
 
 | UWA ID    | Name            | GitHub Username |
 |-----------|-----------------|-----------------|
@@ -26,96 +7,193 @@ The application is built with a client-server architecture using Flask on the ba
 | 24320547  | Huilin Tang     | KaylinTang      |
 | 22860294  | Xin Chang       | XinChang-wa     |
 
+## Overview
+
+SitBuddy is a modern web application that connects parents with qualified babysitters in their local area. Built with Flask and featuring a comprehensive messaging system, SitBuddy makes finding and booking childcare simple and secure.
+
+### Key Features
+- 👤 **User Authentication**: Secure registration and login system
+- 🔍 **Profile Management**: Detailed profiles for both parents and babysitters
+- 💬 **Real-time Messaging**: Enhanced communication system with booking management
+- 📅 **Booking System**: Create, manage, and track babysitting requests
+- 🎨 **Responsive Design**: Mobile-friendly interface using Bootstrap 5
+- 🔒 **Security**: CSRF protection and secure data handling
+
 ---
 
-## Launch Instructions
+## Technology Stack
+
+- **Backend**: Flask (Python)
+- **Database**: SQLite with SQLAlchemy ORM
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Styling**: Bootstrap 5
+- **Authentication**: Flask-Login
+- **Security**: Flask-WTF CSRF Protection
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package installer)
+
+### Installation
 
 ```bash
-# Create and activate a virtual environment
+# Clone the repository
+git clone <repository-url>
+cd SitBuddy
+
+# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
+# Initialize the database and seed data
+python seed.py
+python seed_messages.py
+
 # Run the application
 python app.py
 ```
 
-The app will be available at http://127.0.0.1:5000.
+The application will be available at **http://127.0.0.1:5000**
 
 ---
 
-## Seeding the Database
+## Database Setup
 
-To populate the database with 10 sample babysitters and 10 sample parents:
-
+### Initial User Data
 ```bash
 python seed.py
 ```
+Creates 10 sample parents and 10 sample babysitters. All accounts use password: `password123`
 
-All seed accounts use the password `password123`. Re-running the script is safe — existing accounts are skipped.
-
-### Seeding Message Data
-
-To create sample bookings and messages for testing the messaging system:
-
+### Messaging Test Data
 ```bash
 python seed_messages.py
 ```
+Creates sample bookings and conversations for testing the messaging system.
 
-This will create:
-- Multiple bookings with different statuses (pending, accepted, completed)
-- Sample conversations between parents and babysitters
-- Test messages for each booking
-
-**Note**: Run `seed.py` first before running `seed_messages.py`.
+**Note**: Run `seed.py` before `seed_messages.py`
 
 ---
 
 ## Messaging System
 
-SitBuddy includes a comprehensive messaging system that enables communication between parents and babysitters.
-
 ### Features
-- 💬 **Conversation Management**: View all conversations in one place
-- 📨 **Real-time Messaging**: Send and receive messages instantly
-- 🔔 **Unread Notifications**: Track unread message counts
-- ✅ **Booking Actions**: Accept or reject bookings directly from messages
-- 🎨 **Beautiful UI**: Clean, intuitive interface with message bubbles
+- **Conversation Management**: Organized list of all conversations
+- **Real-time Updates**: Messages appear instantly without page refresh
+- **Role-based Interface**: Different views for parents and babysitters
+- **Booking Actions**: Accept/reject bookings directly from chat
+- **System Messages**: Automated notifications for booking status changes
+- **Unread Tracking**: Visual indicators for new messages
+- **Responsive Design**: Works seamlessly on mobile devices
 
-### Quick Start
-1. Login as a parent or babysitter
-2. Click "Messages" in the navigation bar
-3. Select a conversation to view messages
-4. Type and send messages
-5. (Babysitters only) Accept or reject pending bookings
+### User Roles
 
-### Documentation
-For detailed information about the messaging system:
-- 📖 **Complete Guide**: `消息系统完整指南.md` - Overview and navigation
-- ⚡ **Quick Start**: `QUICK_START_MESSAGES.md` - Get started in 5 minutes
-- 📚 **Full Documentation**: `MESSAGE_SYSTEM_README.md` - Detailed features and API
-- 🏗️ **Architecture**: `ARCHITECTURE.md` - System design and data flow
-- 🎬 **Demo Guide**: `DEMO_GUIDE.md` - Presentation and demonstration guide
+#### Parents (Senders)
+- View booking request status
+- Send messages to babysitters
+- Read-only interface for pending requests
+- Receive notifications when bookings are accepted/rejected
+
+#### Babysitters (Receivers)
+- Accept or reject booking requests
+- Send messages to parents
+- Action buttons for pending requests
+- Generate system messages for status changes
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/messages/` | GET | Main messaging interface |
+| `/messages/api/conversations` | GET | Get all conversations |
+| `/messages/api/conversation/<id>` | GET | Get specific conversation |
+| `/messages/api/send` | POST | Send new message |
+| `/messages/api/booking/<id>/status` | PUT | Update booking status |
 
 ### Testing the Messaging System
+
 ```bash
-# Test the API endpoints
+# Test API functionality
 python test_messages_api.py
 
-# Check database contents
+# Check database contents only
 python test_messages_api.py db
 ```
 
 ---
 
-## Running the Tests
+## Project Structure
 
+```
+SitBuddy/
+├── app.py                 # Main application file
+├── requirements.txt       # Python dependencies
+├── seed.py               # User data seeding
+├── seed_messages.py      # Message data seeding
+├── test_messages_api.py  # API testing script
+├── models/               # Database models
+│   ├── user.py
+│   ├── message.py
+│   ├── booking.py
+│   └── ...
+├── routes/               # Application routes
+│   ├── auth.py
+│   ├── main.py
+│   └── messages.py
+├── templates/            # HTML templates
+│   ├── messages.html
+│   └── ...
+├── static/               # Static assets
+│   ├── css/
+│   └── js/
+│       └── messages.js
+└── planning/             # Project documentation
+```
+
+---
+
+## Development
+
+### Running Tests
 ```bash
-# Ensure the virtual environment is active
-source venv/bin/activate      # Windows: venv\Scripts\activate
+# Activate virtual environment
+source venv/bin/activate
 
-# Run the test suite
+# Run test suite
 python -m pytest
 ```
+
+### Code Style
+- Follow PEP 8 for Python code
+- Use meaningful variable and function names
+- Include docstrings for all functions and classes
+- Maintain consistent indentation (4 spaces)
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+---
+
+## License
+
+This project is developed as part of CITS5505 coursework at the University of Western Australia.
+
+---
+
+## Support
+
+For issues or questions, please refer to the project documentation in the `planning/` directory or contact the development team.
