@@ -1,14 +1,52 @@
 (() => {
   "use strict";
 
+  const dateInput = document.getElementById("booking-date");
   const startTimeInput = document.getElementById("start_time");
   const durationInput = document.getElementById("duration_hours");
   const startTimeError = document.getElementById("start-time-error");
   const durationError = document.getElementById("duration-error");
   const form = document.getElementById("booking-form");
 
+  // Map day names to JavaScript day numbers (0=Sunday, 1=Monday, etc.)
+  // Supports both full names ("Monday") and abbreviations ("Mon")
+  const dayNameToNumber = {
+    "Sun": 0, "Sunday": 0,
+    "Mon": 1, "Monday": 1,
+    "Tue": 2, "Tuesday": 2,
+    "Wed": 3, "Wednesday": 3,
+    "Thu": 4, "Thursday": 4,
+    "Fri": 5, "Friday": 5,
+    "Sat": 6, "Saturday": 6
+  };
+
+  // Convert available days to JS day numbers
+  const availableDayNumbers = (window.availableDays || []).map(day => dayNameToNumber[day]);
+
+  // Initialize Flatpickr date picker
+  if (dateInput && typeof flatpickr !== "undefined") {
+    flatpickr(dateInput, {
+      minDate: window.todayDate || "today",
+      dateFormat: "Y-m-d",
+      disable: [
+        function(date) {
+          if (!availableDayNumbers || availableDayNumbers.length === 0) {
+            return false;
+          }
+          return !availableDayNumbers.includes(date.getDay());
+        }
+      ],
+      locale: {
+        firstDayOfWeek: 1
+      },
+      onReady: function(selectedDates, dateStr, instance) {
+        instance.calendarContainer.style.boxShadow = "0 0.5rem 1rem rgba(0, 0, 0, 0.15)";
+      }
+    });
+  }
+
   function validateStartTime() {
-    if (!startTimeInput.value) return true; // let server handle required
+    if (!startTimeInput.value) return true;
     const [hours, minutes] = startTimeInput.value.split(":").map(Number);
     const totalMinutes = hours * 60 + (minutes || 0);
     const valid = totalMinutes >= 6 * 60 && totalMinutes <= 22 * 60;
@@ -33,8 +71,12 @@
   form.addEventListener("submit", (e) => {
     const timeOk = validateStartTime();
     const durOk = validateDuration();
-    if (!timeOk || !durOk) {
+    const dateOk = dateInput.value !== "";
+    if (!dateOk || !timeOk || !durOk) {
       e.preventDefault();
+      if (!dateOk) {
+        dateInput.classList.add("is-invalid");
+      }
     }
   });
 })();
