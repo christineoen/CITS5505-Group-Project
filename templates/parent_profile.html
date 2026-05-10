@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -47,24 +51,14 @@
 
                     <!-- View mode -->
                     <div id="view-mode">
-                        <div class="row text-center g-3 my-2">
-                            <div class="col-12">
-                                <div class="profile-stat">
-                                    {% set num_children = profile.children|length if profile.children else 0 %}
-                                    <div class="profile-stat-value">{{ num_children if num_children > 0 else "–" }}</div>
-                                    <div class="profile-stat-label">{{ 'child' if num_children == 1 else 'children' }}</div>
-                                </div>
-                            </div>
-                        </div>
 
                         {% if profile.children %}
-                        <hr>
                         <div class="mb-3">
                             <p class="fw-semibold mb-2">Children</p>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for child in profile.children %}
                                 <span class="badge bg-info text-dark px-3 py-2">
-                                    {{ child.name }}, age {{ child.age }}
+                                    {{ child.name }}{% if child.age is not none %}, age {{ child.age }}{% endif %}
                                 </span>
                                 {% endfor %}
                             </div>
@@ -74,7 +68,21 @@
                         {% if profile.about %}
                         <div class="mb-3">
                             <p class="fw-semibold mb-1">About the Family</p>
-                            <p class="text-muted">{{ profile.about }}</p>
+                            <p class="text-muted mb-0">{{ profile.about }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if not profile.children and not profile.about %}
+                        <p class="text-muted small">No profile details added yet.</p>
+                        {% endif %}
+
+                        {% if profile.user.latitude and profile.user.longitude %}
+                        <div class="mb-3 mt-3">
+                            <p class="fw-semibold mb-2">Location</p>
+                            <div id="profile-map"
+                                 data-lat="{{ profile.user.latitude }}"
+                                 data-lng="{{ profile.user.longitude }}"
+                                 style="height:200px;border-radius:8px;overflow:hidden;"></div>
                         </div>
                         {% endif %}
 
@@ -96,12 +104,10 @@
                           class="d-none"
                           enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="children_json" id="children_json_input"
-                               value="{{ profile.children | tojson if profile.children else '[]' }}">
 
                         <!-- Photo upload -->
                         <div class="mb-4 text-center">
-                            <div class="avatar-upload-wrapper mx-auto" id="avatar-wrapper">
+                            <div class="avatar-upload-wrapper mx-auto">
                                 {% if profile.user.photo_url %}
                                 <img src="{{ url_for('static', filename=profile.user.photo_url) }}"
                                      alt="{{ profile.user.name }}"
@@ -128,13 +134,12 @@
                             <div class="form-text mt-1">Click photo to change · PNG, JPG, GIF or WebP · max 5 MB</div>
                         </div>
 
-                        <!-- Children editor -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Children</label>
                             <div id="children-list" class="d-flex flex-column gap-2 mb-2"></div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="add-child-btn">
-                                + Add Child
-                            </button>
+                            <button type="button" id="add-child" class="btn btn-outline-secondary btn-sm">+ Add child</button>
+                            <input type="hidden" name="children_json" id="children-json"
+                                   value='{{ (profile.children or []) | tojson }}'>
                         </div>
 
                         <div class="mb-3">
@@ -143,17 +148,16 @@
                                       placeholder="Any notes for babysitters, allergies, special needs…">{{ profile.about or '' }}</textarea>
                         </div>
 
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Suburb</label>
-                                <input type="text" name="suburb" class="form-control"
-                                       value="{{ profile.user.suburb or '' }}" placeholder="e.g. Subiaco">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Postcode</label>
-                                <input type="text" name="postcode" class="form-control"
-                                       value="{{ profile.user.postcode or '' }}" placeholder="e.g. 6008">
-                            </div>
+                        <div class="mb-3 position-relative">
+                            <label class="form-label fw-semibold">Suburb / Postcode</label>
+                            <input type="text" id="location-search" class="form-control"
+                                   placeholder="Start typing suburb or postcode…" autocomplete="off"
+                                   value="{{ (profile.user.suburb ~ ' (' ~ profile.user.postcode ~ ')') if profile.user.suburb and profile.user.postcode else (profile.user.suburb or profile.user.postcode or '') }}">
+                            <ul id="location-dropdown"
+                                class="list-group position-absolute w-100 shadow"
+                                style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
+                            <input type="hidden" id="suburb" name="suburb" value="{{ profile.user.suburb or '' }}">
+                            <input type="hidden" id="postcode" name="postcode" value="{{ profile.user.postcode or '' }}">
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
@@ -161,18 +165,6 @@
                             <button type="button" class="btn btn-outline-secondary flex-fill" id="cancel-btn">Cancel</button>
                         </div>
                     </form>
-                    {% endif %}
-
-                    <!-- Map (always visible) -->
-                    {% if profile.user.latitude and profile.user.longitude %}
-                    <hr>
-                    <div class="mt-3">
-                        <p class="fw-semibold mb-2">Location</p>
-                        <div id="profile-map"
-                             data-lat="{{ profile.user.latitude }}"
-                             data-lng="{{ profile.user.longitude }}"
-                             style="height:200px;border-radius:0.5rem;"></div>
-                    </div>
                     {% endif %}
 
                 </div>
@@ -184,85 +176,11 @@
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% if profile.user.latitude and profile.user.longitude %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-{% if is_own %}
-<script>
-    // ── View / Edit toggle ──
-    document.getElementById('edit-btn').addEventListener('click', function () {
-        document.getElementById('view-mode').classList.add('d-none');
-        document.getElementById('edit-form').classList.remove('d-none');
-        renderChildren();
-    });
-    document.getElementById('cancel-btn').addEventListener('click', function () {
-        document.getElementById('edit-form').classList.add('d-none');
-        document.getElementById('view-mode').classList.remove('d-none');
-    });
-
-    // ── Photo preview ──
-    document.getElementById('photo-input').addEventListener('change', function () {
-        const file = this.files[0];
-        if (!file) return;
-        const preview = document.getElementById('photo-preview');
-        const placeholder = document.getElementById('photo-placeholder');
-        const reader = new FileReader();
-        reader.onload = e => {
-            preview.src = e.target.result;
-            preview.classList.remove('d-none');
-            if (placeholder) placeholder.classList.add('d-none');
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // ── Children editor ──
-    const childrenInput = document.getElementById('children_json_input');
-    let children = JSON.parse(childrenInput.value || '[]');
-
-    function syncInput() {
-        childrenInput.value = JSON.stringify(children);
-    }
-
-    function renderChildren() {
-        const list = document.getElementById('children-list');
-        list.innerHTML = '';
-        children.forEach((child, i) => {
-            const row = document.createElement('div');
-            row.className = 'd-flex gap-2 align-items-center';
-            row.innerHTML = `
-                <input type="text" class="form-control form-control-sm" placeholder="Name"
-                       value="${child.name || ''}" data-i="${i}" data-field="name">
-                <input type="number" class="form-control form-control-sm" placeholder="Age"
-                       min="0" max="18" style="width:80px"
-                       value="${child.age ?? ''}" data-i="${i}" data-field="age">
-                <button type="button" class="btn btn-outline-danger btn-sm" data-remove="${i}">✕</button>
-            `;
-            list.appendChild(row);
-        });
-
-        list.querySelectorAll('input').forEach(inp => {
-            inp.addEventListener('input', function () {
-                const idx = parseInt(this.dataset.i);
-                const field = this.dataset.field;
-                children[idx][field] = field === 'age' ? parseInt(this.value) || 0 : this.value;
-                syncInput();
-            });
-        });
-
-        list.querySelectorAll('[data-remove]').forEach(btn => {
-            btn.addEventListener('click', function () {
-                children.splice(parseInt(this.dataset.remove), 1);
-                renderChildren();
-                syncInput();
-            });
-        });
-    }
-
-    document.getElementById('add-child-btn').addEventListener('click', function () {
-        children.push({ name: '', age: 0 });
-        renderChildren();
-        syncInput();
-    });
-</script>
-{% endif %}
 <script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
+{% endif %}
+{% if is_own %}
+<script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
+{% endif %}
 {% endblock %}
