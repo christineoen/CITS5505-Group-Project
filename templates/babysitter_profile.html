@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-{% endblock %}
-
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -26,9 +22,16 @@
 
                     <!-- Header -->
                     <div class="text-center mb-4">
+                        {% if profile.user.photo_url %}
+                        <img src="{{ url_for('static', filename=profile.user.photo_url) }}"
+                             alt="{{ profile.user.name }}"
+                             class="rounded-circle mb-3 object-fit-cover"
+                             style="width:80px;height:80px;">
+                        {% else %}
                         <div class="avatar-circle bg-primary mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
                             {{ profile.user.name[0].upper() }}
                         </div>
+                        {% endif %}
                         <h3 class="fw-bold mb-1">{{ profile.user.name }}</h3>
                         <p class="text-muted mb-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
@@ -91,14 +94,14 @@
                         </div>
                         {% endif %}
 
-                        <!-- Location map -->
+                        <!-- Map -->
                         {% if profile.user.latitude and profile.user.longitude %}
                         <div class="mb-3">
                             <p class="fw-semibold mb-2">Location</p>
                             <div id="profile-map"
                                  data-lat="{{ profile.user.latitude }}"
                                  data-lng="{{ profile.user.longitude }}"
-                                 style="height:200px;border-radius:8px;overflow:hidden;"></div>
+                                 style="height:200px;border-radius:0.5rem;"></div>
                         </div>
                         {% endif %}
 
@@ -116,8 +119,41 @@
 
                     <!-- Edit mode -->
                     {% if is_own %}
-                    <form method="POST" action="{{ url_for('main.babysitter_profile_edit', profile_id=profile.id) }}" id="edit-form" class="d-none">
+                    <form method="POST"
+                          action="{{ url_for('main.babysitter_profile_edit', profile_id=profile.id) }}"
+                          id="edit-form"
+                          class="d-none"
+                          enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Photo upload -->
+                        <div class="mb-4 text-center">
+                            <div class="avatar-upload-wrapper mx-auto" id="avatar-wrapper">
+                                {% if profile.user.photo_url %}
+                                <img src="{{ url_for('static', filename=profile.user.photo_url) }}"
+                                     alt="{{ profile.user.name }}"
+                                     id="photo-preview"
+                                     class="avatar-upload-img rounded-circle object-fit-cover">
+                                {% else %}
+                                <div class="avatar-circle bg-primary avatar-upload-img" id="photo-placeholder"
+                                     style="font-size:2rem;">
+                                    {{ profile.user.name[0].upper() }}
+                                </div>
+                                <img id="photo-preview" class="avatar-upload-img rounded-circle object-fit-cover d-none"
+                                     alt="Preview">
+                                {% endif %}
+                                <div class="avatar-camera-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 16 16">
+                                        <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z"/>
+                                        <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
+                                    </svg>
+                                </div>
+                                <input type="file" name="photo" id="photo-input"
+                                       accept="image/png,image/jpeg,image/gif,image/webp"
+                                       class="avatar-file-input">
+                            </div>
+                            <div class="form-text mt-1">Click photo to change · PNG, JPG, GIF or WebP · max 5 MB</div>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Bio</label>
@@ -151,16 +187,17 @@
                             </div>
                         </div>
 
-                        <div class="mb-3 position-relative">
-                            <label class="form-label fw-semibold">Suburb / Postcode</label>
-                            <input type="text" id="location-search" class="form-control"
-                                   placeholder="Start typing suburb or postcode…" autocomplete="off"
-                                   value="{{ (profile.user.suburb ~ ' (' ~ profile.user.postcode ~ ')') if profile.user.suburb and profile.user.postcode else (profile.user.suburb or profile.user.postcode or '') }}">
-                            <ul id="location-dropdown"
-                                class="list-group position-absolute w-100 shadow"
-                                style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
-                            <input type="hidden" id="suburb" name="suburb" value="{{ profile.user.suburb or '' }}">
-                            <input type="hidden" id="postcode" name="postcode" value="{{ profile.user.postcode or '' }}">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Suburb</label>
+                                <input type="text" name="suburb" class="form-control"
+                                       value="{{ profile.user.suburb or '' }}" placeholder="e.g. Subiaco">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Postcode</label>
+                                <input type="text" name="postcode" class="form-control"
+                                       value="{{ profile.user.postcode or '' }}" placeholder="e.g. 6008">
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
@@ -179,11 +216,34 @@
 {% endblock %}
 
 {% block scripts %}
-{% if profile.user.latitude and profile.user.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
-{% endif %}
 {% if is_own %}
-<script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
+<script>
+    document.getElementById('edit-btn').addEventListener('click', function () {
+        document.getElementById('view-mode').classList.add('d-none');
+        document.getElementById('edit-form').classList.remove('d-none');
+    });
+    document.getElementById('cancel-btn').addEventListener('click', function () {
+        document.getElementById('edit-form').classList.add('d-none');
+        document.getElementById('view-mode').classList.remove('d-none');
+    });
+
+    // Live photo preview
+    document.getElementById('photo-input').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const preview = document.getElementById('photo-preview');
+        const placeholder = document.getElementById('photo-placeholder');
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            if (placeholder) placeholder.classList.add('d-none');
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
 {% endif %}
+<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
 {% endblock %}

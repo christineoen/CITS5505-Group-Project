@@ -1,5 +1,6 @@
 from datetime import datetime, time as time_type
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+import os, uuid
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import login_required, current_user
 from models import db
 from models.babysitter_profile import BabysitterProfile
@@ -10,6 +11,21 @@ import json
 from utils import POSTCODE_SUBURB, DAYS, geocode_suburb
 
 main_bp = Blueprint("main", __name__)
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+
+def _save_photo(file):
+    """Save uploaded photo, return relative URL or None on failure."""
+    if not file or file.filename == "":
+        return None
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return None
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    upload_folder = current_app.config["UPLOAD_FOLDER"]
+    file.save(os.path.join(upload_folder, filename))
+    return f"uploads/{filename}"
 
 
 @main_bp.before_request
@@ -254,6 +270,10 @@ def babysitter_profile_edit(profile_id):
         current_user.latitude = lat
         current_user.longitude = lng
 
+    photo_url = _save_photo(request.files.get("photo"))
+    if photo_url:
+        current_user.photo_url = photo_url
+
     db.session.commit()
     flash("Profile updated.", "success")
     return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
@@ -302,6 +322,10 @@ def parent_profile_edit(profile_id):
         lat, lng = geocode_suburb(suburb, postcode)
         current_user.latitude = lat
         current_user.longitude = lng
+
+    photo_url = _save_photo(request.files.get("photo"))
+    if photo_url:
+        current_user.photo_url = photo_url
 
     db.session.commit()
     flash("Profile updated.", "success")
