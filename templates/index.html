@@ -2,160 +2,14 @@
 {% block title %}Home – SitBuddy{% endblock %}
 
 {% block extra_head %}
+{% if current_user.is_authenticated %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endif %}
 {% endblock %}
 
 {% block content %}
-
 {% if not current_user.is_authenticated %}
-<!-- Hero Section with Morandi Colors -->
-<div class="hero-section">
-    <div class="hero-content">
-        <!-- Main Title - Above Photos -->
-        <div class="hero-title-section">
-            <div class="hero-subtitle-small">Welcome to SitBuddy</div>
-            <h1 class="hero-main-title">
-                <span class="hero-main-line">Connect Families</span>
-                <span class="hero-highlight">with Trusted Care</span>
-            </h1>
-        </div>
-
-        <!-- Photo Carousel Placeholder -->
-        <div class="hero-carousel">
-            <div class="carousel-container">
-                <div class="carousel-slide active">
-                    <img src="{{ url_for('static', filename='images/poster1.png') }}" alt="SitBuddy Community" class="carousel-image">
-                </div>
-                <div class="carousel-slide">
-                    <img src="{{ url_for('static', filename='images/poster2.png') }}" alt="Trusted Babysitters" class="carousel-image">
-                </div>
-                <div class="carousel-slide">
-                    <img src="{{ url_for('static', filename='images/poster3.png') }}" alt="Happy Families" class="carousel-image">
-                </div>
-            </div>
-            <div class="carousel-indicators">
-                <button class="indicator active" data-slide="0"></button>
-                <button class="indicator" data-slide="1"></button>
-                <button class="indicator" data-slide="2"></button>
-            </div>
-            <div class="carousel-attribution">
-                <p class="attribution-text">Images generated with ChatGPT</p>
-            </div>
-        </div>
-
-        <div class="hero-badge">
-            <span class="hero-badge-text">Trusted • Safe • Reliable</span>
-        </div>
-        
-        <p class="hero-subtitle">
-            Whether you're a parent seeking reliable childcare or a babysitter looking to help families, 
-            SitBuddy brings together Perth's caring community with safety and trust at the heart.
-        </p>
-        <div class="hero-actions">
-            <a href="{{ url_for('auth.signup') }}" class="btn-hero btn-hero-primary">
-                <span>Join SitBuddy</span>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 1L15 8L8 15M15 8H1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
-            <a href="{{ url_for('auth.login') }}" class="btn-hero btn-hero-secondary">
-                Sign In
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- Features Section -->
-<div class="features-section">
-    <div class="container">
-        <div class="features-header">
-            <h2 class="features-title">Why Choose SitBuddy?</h2>
-            <p class="features-subtitle">Everything you need for peace of mind</p>
-        </div>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon bg-sage">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Verified Profiles</h3>
-                <p class="feature-description">All users are background checked and verified. Parents and babysitters can trust each other with confidence.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon bg-dusty-rose">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M8 12H16M12 8V16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Easy Booking</h3>
-                <p class="feature-description">Simple booking system for parents to find care, and for babysitters to manage their availability and bookings.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon bg-warm-gray">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M8 10H16M8 14H16M6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Real-time Chat</h3>
-                <p class="feature-description">Built-in messaging system to coordinate details, share updates, and maintain clear communication.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon bg-soft-blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Reviews & Ratings</h3>
-                <p class="feature-description">Honest feedback system helps parents choose the right sitter and helps babysitters build their reputation.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon bg-muted-lavender">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-                        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Flexible Scheduling</h3>
-                <p class="feature-description">Set your availability as a babysitter or find care when you need it as a parent. Flexible timing for everyone.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon bg-pale-terracotta">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Location-Based Matching</h3>
-                <p class="feature-description">Smart map integration helps you find the closest babysitters or families in your neighborhood for convenience.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CTA Section -->
-<div class="cta-section">
-    <div class="container">
-        <div class="cta-content">
-            <h2 class="cta-title">Ready to Join Our Community?</h2>
-            <p class="cta-subtitle">Whether you're a parent seeking care or a babysitter ready to help, join thousands who trust SitBuddy</p>
-            <div class="cta-actions">
-                <a href="{{ url_for('auth.signup') }}" class="btn-cta btn-cta-primary">Create Account</a>
-                <a href="#" class="btn-cta btn-cta-secondary">Learn More</a>
-            </div>
-        </div>
-    </div>
-</div>
-
+  {% include "partials/home_logged_out.html" %}
 {% else %}
 
 <!-- Welcome Section for Logged-in Users -->
@@ -337,7 +191,6 @@
 {% endif %}
 {% endblock %}
 
-
 {% block scripts %}
 {% if current_user.is_authenticated %}
 <script>
@@ -347,41 +200,4 @@ window._sitbuddyMode     = {{ mode | tojson }};
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endif %}
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-
-{% if not current_user.is_authenticated %}
-<script>
-// Photo Carousel functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const slides = document.querySelectorAll('.carousel-slide');
-    const indicators = document.querySelectorAll('.indicator');
-    let currentSlide = 0;
-    
-    function showSlide(index) {
-        // Hide all slides
-        slides.forEach(slide => slide.classList.remove('active'));
-        indicators.forEach(indicator => indicator.classList.remove('active'));
-        
-        // Show current slide
-        slides[index].classList.add('active');
-        indicators[index].classList.add('active');
-    }
-    
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % slides.length;
-        showSlide(currentSlide);
-    }
-    
-    // Add click handlers to indicators
-    indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => {
-            currentSlide = index;
-            showSlide(currentSlide);
-        });
-    });
-    
-    // Auto-advance slides every 4 seconds
-    setInterval(nextSlide, 4000);
-});
-</script>
-{% endif %}
 {% endblock %}
