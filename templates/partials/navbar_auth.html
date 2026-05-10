@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-2">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-2">
     <div class="container d-flex align-items-center">
 
-        <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">SitBuddy</a>
+        <a class="navbar-brand fw-bold text-dark" href="{{ url_for('main.index') }}">SitBuddy</a>
 
         <ul class="navbar-nav mx-auto gap-4">
             <li class="nav-item">
@@ -23,29 +23,48 @@
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false">
-                <div class="avatar-circle bg-primary border border-white"
-                     style="width:42px;height:42px;font-size:1.1rem;">
+                {% set sitter_photo = current_user.babysitter_profile.photo_url if current_user.is_babysitter and current_user.babysitter_profile else None %}
+                {% set avatar_bg = 'avatar-grey' if current_user.is_parent else 'bg-primary' %}
+                {% if sitter_photo %}
+                <img src="{{ sitter_photo }}" alt="{{ current_user.name }}" class="rounded-circle"
+                     style="width:34px;height:34px;object-fit:cover;">
+                {% else %}
+                <div class="avatar-circle {{ avatar_bg }}"
+                     style="width:34px;height:34px;font-size:0.95rem;">
                     {{ current_user.name[0].upper() }}
                 </div>
+                {% endif %}
             </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><span class="dropdown-item-text text-muted small">{{ current_user.name }}</span></li>
-                <li><hr class="dropdown-divider"></li>
+            <ul class="dropdown-menu dropdown-menu-end small">
+                <li>
+                    <div class="dropdown-item-text d-flex align-items-center gap-2 py-1">
+                        {% if sitter_photo %}
+                        <img src="{{ sitter_photo }}" alt="{{ current_user.name }}" class="rounded-circle"
+                             style="width:28px;height:28px;object-fit:cover;">
+                        {% else %}
+                        <div class="avatar-circle {{ avatar_bg }}" style="width:28px;height:28px;font-size:0.8rem;">
+                            {{ current_user.name[0].upper() }}
+                        </div>
+                        {% endif %}
+                        <span class="text-muted">{{ current_user.name }}</span>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
                 {% if current_user.is_parent and current_user.parent_profile %}
                 <li>
                     <a class="dropdown-item" href="{{ url_for('main.parent_profile', profile_id=current_user.parent_profile.id) }}">
-                        Parent Profile
+                        My Profile
                     </a>
                 </li>
                 {% endif %}
                 {% if current_user.is_babysitter and current_user.babysitter_profile %}
                 <li>
                     <a class="dropdown-item" href="{{ url_for('main.babysitter_profile', profile_id=current_user.babysitter_profile.id) }}">
-                        Babysitter Profile
+                        My Profile
                     </a>
                 </li>
                 {% endif %}
-                <li><hr class="dropdown-divider"></li>
+                <li><hr class="dropdown-divider my-1"></li>
                 <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
             </ul>
         </div>

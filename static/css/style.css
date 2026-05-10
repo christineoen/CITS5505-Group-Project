@@ -1,9 +1,55 @@
+:root {
+    --bs-primary: #7c3aed;
+    --bs-primary-rgb: 124, 58, 237;
+    --bs-link-color: #7c3aed;
+    --bs-link-color-rgb: 124, 58, 237;
+    --bs-btn-bg: #7c3aed;
+    --bs-btn-border-color: #7c3aed;
+}
+
+body {
+    background-color: #f5f5f5;
+}
+
+.text-teal {
+    color: #0d9488 !important;
+}
+
 /* ── Navigation ── */
 .navbar .dropdown-toggle::after {
     display: none;
 }
 
+.navbar .nav-link {
+    color: #6b7280;
+    padding-bottom: 0.35rem;
+    border-bottom: 2px solid transparent;
+}
+
+.navbar .nav-link:hover {
+    color: #111827;
+}
+
+.navbar .nav-link.active {
+    color: #111827;
+    border-bottom: 2px solid var(--bs-primary);
+}
+
+/* ── Babysitter cards ── */
+#cards-grid .card {
+    transition: box-shadow 0.18s ease, border-color 0.18s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+#cards-grid .card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    border-color: #d1d5db;
+}
+
 /* ── Avatar circle ── */
+.avatar-grey { background-color: #4b5563 !important; }
+
 .avatar-circle {
     width: 64px;
     height: 64px;
@@ -15,6 +61,7 @@
     font-size: 1.5rem;
     font-weight: 600;
 }
+
 
 /* ── Messages Page ── */
 
@@ -49,9 +96,9 @@
     border: 1px solid #dee2e6;
     transition: border-color .15s, background-color .15s;
 }
-.role-card:hover { border-color: #0d6efd; }
-.role-card.selected { background-color: #e8f0fe; border-color: #0d6efd; }
-.role-card.selected .chevron { color: #0d6efd; }
+.role-card:hover { border-color: var(--bs-primary); }
+.role-card.selected { background-color: #e8f0fe; border-color: var(--bs-primary); }
+.role-card.selected .chevron { color: var(--bs-primary); }
 
 /* ── Profile Pages ── */
 .profile-stat {

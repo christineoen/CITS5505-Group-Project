@@ -11,6 +11,7 @@ class BabysitterProfile(db.Model):
     hourly_rate = db.Column(db.Float)
     experience_years = db.Column(db.Integer)
     availability = db.Column(db.String(256))
+    photo_url = db.Column(db.String(512), nullable=True)
 
     user = db.relationship("User", back_populates="babysitter_profile")
 
@@ -28,6 +29,7 @@ class BabysitterProfile(db.Model):
             "days": json.loads(self.availability) if self.availability else [],
             "lat": self.user.latitude,
             "lng": self.user.longitude,
+            "photo_url": self.photo_url or "",
         }
 
     def __repr__(self):

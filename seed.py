@@ -6,16 +6,16 @@ from models.parent_profile import ParentProfile
 from utils import POSTCODE_COORDS
 
 BABYSITTERS = [
-    {"name": "Emma Sits", "email": "emma@example.com", "suburb": "Subiaco", "postcode": "6008", "bio": "Experienced nanny with a love for arts and crafts.", "hourly_rate": 22.0, "experience_years": 4, "availability": '["Mon", "Tue", "Wed"]'},
-    {"name": "Liam Care", "email": "liam@example.com", "suburb": "Fremantle", "postcode": "6160", "bio": "Studying early childhood education. CPR certified.", "hourly_rate": 18.0, "experience_years": 2, "availability": '["Thu", "Fri", "Sat"]'},
-    {"name": "Sofia Nanny", "email": "sofia@example.com", "suburb": "Cottesloe", "postcode": "6011", "bio": "Former kindergarten teacher. Bilingual English/Spanish.", "hourly_rate": 28.0, "experience_years": 7, "availability": '["Mon", "Wed", "Fri"]'},
-    {"name": "Jack Babysits", "email": "jack@example.com", "suburb": "Osborne Park", "postcode": "6050", "bio": "Great with toddlers. Love outdoor activities and sport.", "hourly_rate": 20.0, "experience_years": 3, "availability": '["Sat", "Sun"]'},
-    {"name": "Mia Childcare", "email": "mia@example.com", "suburb": "Bentley", "postcode": "6102", "bio": "Reliable and caring. First aid trained.", "hourly_rate": 25.0, "experience_years": 5, "availability": '["Mon", "Tue", "Thu", "Fri"]'},
-    {"name": "Noah Sitter", "email": "noah@example.com", "suburb": "Nedlands", "postcode": "6009", "bio": "Patient and fun. Experienced with special needs children.", "hourly_rate": 30.0, "experience_years": 6, "availability": '["Wed", "Thu", "Fri"]'},
-    {"name": "Ava Nanny", "email": "ava@example.com", "suburb": "Leederville", "postcode": "6007", "bio": "Music and art enthusiast. Great for creative kids.", "hourly_rate": 21.0, "experience_years": 2, "availability": '["Mon", "Sat", "Sun"]'},
-    {"name": "Oliver Care", "email": "oliver@example.com", "suburb": "Claremont", "postcode": "6010", "bio": "Dad of two. Knows how to keep kids engaged and happy.", "hourly_rate": 23.0, "experience_years": 5, "availability": '["Tue", "Wed", "Sat"]'},
-    {"name": "Isla Sits", "email": "isla@example.com", "suburb": "Floreat", "postcode": "6014", "bio": "Gentle and nurturing. Loves reading and storytelling.", "hourly_rate": 19.0, "experience_years": 1, "availability": '["Fri", "Sat", "Sun"]'},
-    {"name": "Ethan Babysit", "email": "ethan@example.com", "suburb": "Northbridge", "postcode": "6003", "bio": "Active and energetic. Great for school-age kids.", "hourly_rate": 20.0, "experience_years": 3, "availability": '["Mon", "Tue", "Fri"]'},
+    {"name": "Emma Sits",     "email": "emma@example.com",   "suburb": "Subiaco",      "postcode": "6008", "bio": "Experienced nanny with a love for arts and crafts.",          "hourly_rate": 22.0, "experience_years": 4, "availability": '["Mon", "Tue", "Wed"]',       "photo_url": "https://randomuser.me/api/portraits/women/1.jpg"},
+    {"name": "Liam Care",     "email": "liam@example.com",   "suburb": "Fremantle",    "postcode": "6160", "bio": "Studying early childhood education. CPR certified.",           "hourly_rate": 18.0, "experience_years": 2, "availability": '["Thu", "Fri", "Sat"]',       "photo_url": "https://randomuser.me/api/portraits/men/1.jpg"},
+    {"name": "Sofia Nanny",   "email": "sofia@example.com",  "suburb": "Cottesloe",    "postcode": "6011", "bio": "Former kindergarten teacher. Bilingual English/Spanish.",      "hourly_rate": 28.0, "experience_years": 7, "availability": '["Mon", "Wed", "Fri"]',       "photo_url": "https://randomuser.me/api/portraits/women/2.jpg"},
+    {"name": "Jack Babysits", "email": "jack@example.com",   "suburb": "Osborne Park", "postcode": "6050", "bio": "Great with toddlers. Love outdoor activities and sport.",      "hourly_rate": 20.0, "experience_years": 3, "availability": '["Sat", "Sun"]',              "photo_url": "https://randomuser.me/api/portraits/men/2.jpg"},
+    {"name": "Mia Childcare", "email": "mia@example.com",    "suburb": "Bentley",      "postcode": "6102", "bio": "Reliable and caring. First aid trained.",                      "hourly_rate": 25.0, "experience_years": 5, "availability": '["Mon", "Tue", "Thu", "Fri"]', "photo_url": "https://randomuser.me/api/portraits/women/3.jpg"},
+    {"name": "Noah Sitter",   "email": "noah@example.com",   "suburb": "Nedlands",     "postcode": "6009", "bio": "Patient and fun. Experienced with special needs children.",   "hourly_rate": 30.0, "experience_years": 6, "availability": '["Wed", "Thu", "Fri"]',       "photo_url": "https://randomuser.me/api/portraits/men/3.jpg"},
+    {"name": "Ava Nanny",     "email": "ava@example.com",    "suburb": "Leederville",  "postcode": "6007", "bio": "Music and art enthusiast. Great for creative kids.",           "hourly_rate": 21.0, "experience_years": 2, "availability": '["Mon", "Sat", "Sun"]',       "photo_url": "https://randomuser.me/api/portraits/women/4.jpg"},
+    {"name": "Oliver Care",   "email": "oliver@example.com", "suburb": "Claremont",    "postcode": "6010", "bio": "Dad of two. Knows how to keep kids engaged and happy.",       "hourly_rate": 23.0, "experience_years": 5, "availability": '["Tue", "Wed", "Sat"]',       "photo_url": "https://randomuser.me/api/portraits/men/4.jpg"},
+    {"name": "Isla Sits",     "email": "isla@example.com",   "suburb": "Floreat",      "postcode": "6014", "bio": "Gentle and nurturing. Loves reading and storytelling.",       "hourly_rate": 19.0, "experience_years": 1, "availability": '["Fri", "Sat", "Sun"]',       "photo_url": "https://randomuser.me/api/portraits/women/5.jpg"},
+    {"name": "Ethan Babysit", "email": "ethan@example.com",  "suburb": "Northbridge",  "postcode": "6003", "bio": "Active and energetic. Great for school-age kids.",            "hourly_rate": 20.0, "experience_years": 3, "availability": '["Mon", "Tue", "Fri"]',       "photo_url": "https://randomuser.me/api/portraits/men/5.jpg"},
 ]
 
 PARENTS = [
@@ -50,6 +50,7 @@ def seed():
                 hourly_rate=data["hourly_rate"],
                 experience_years=data["experience_years"],
                 availability=data["availability"],
+                photo_url=data.get("photo_url"),
             ))
             print(f"Created babysitter: {data['name']}")
 
