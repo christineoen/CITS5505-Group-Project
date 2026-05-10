@@ -133,3 +133,21 @@ if (addBtn) {
 
     document.querySelector('form').addEventListener('submit', serializeChildren);
 }
+
+// Photo upload preview — no-ops silently when widget is absent
+const photoInput = document.getElementById('photo-input');
+if (photoInput) {
+    photoInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const preview = document.getElementById('photo-preview');
+        const placeholder = document.getElementById('photo-placeholder');
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            if (placeholder) placeholder.classList.add('d-none');
+        };
+        reader.readAsDataURL(file);
+    });
+}
