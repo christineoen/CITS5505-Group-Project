@@ -8,7 +8,6 @@ from models.user import User
 csrf = CSRFProtect()
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
 
 
