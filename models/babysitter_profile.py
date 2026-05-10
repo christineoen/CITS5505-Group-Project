@@ -1,6 +1,5 @@
 import json
 from models import db
-from utils import POSTCODE_SUBURB
 
 
 class BabysitterProfile(db.Model):
@@ -17,7 +16,7 @@ class BabysitterProfile(db.Model):
 
     def to_card(self):
         postcode = self.user.postcode or ""
-        suburb = self.user.suburb or POSTCODE_SUBURB.get(postcode, "")
+        suburb = self.user.suburb or ""
         return {
             "id": self.id,
             "name": self.user.name,

@@ -72,6 +72,25 @@ if (searchInput) {
             dropdown.style.display = 'none';
         }
     });
+
+    searchInput.addEventListener('input', () => searchInput.classList.remove('is-invalid'));
+
+    const locationForm = searchInput.closest('form');
+    if (locationForm) {
+        locationForm.addEventListener('submit', function (e) {
+            if (searchInput.value.trim() && !postcodeHidden.value.trim()) {
+                e.preventDefault();
+                searchInput.classList.add('is-invalid');
+                if (!document.getElementById('location-error')) {
+                    const err = document.createElement('div');
+                    err.id = 'location-error';
+                    err.className = 'invalid-feedback';
+                    err.textContent = 'Please select a suburb from the dropdown.';
+                    searchInput.after(err);
+                }
+            }
+        });
+    }
 }
 
 // Profile edit/cancel toggle

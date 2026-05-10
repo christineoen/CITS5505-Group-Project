@@ -7,7 +7,7 @@ from models.parent_profile import ParentProfile
 from models.booking import Booking
 from forms import BookingForm
 import json
-from utils import POSTCODE_SUBURB, DAYS, geocode_suburb
+from utils import DAYS, geocode_suburb
 
 main_bp = Blueprint("main", __name__)
 
@@ -39,7 +39,7 @@ def index():
         mode=mode,
         profiles=profiles,
         locations=locations,
-        postcode_suburb=POSTCODE_SUBURB,
+        postcode_suburb={p["location"]: p["suburb"] for p in profiles if p["location"] and p["suburb"]},
         days=DAYS,
     )
 
@@ -243,10 +243,6 @@ def babysitter_profile_edit(profile_id):
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
 
-    if postcode and postcode not in POSTCODE_SUBURB:
-        flash("Invalid postcode. Please choose from the supported suburbs.", "danger")
-        return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
-
     if suburb != current_user.suburb or postcode != current_user.postcode:
         current_user.suburb = suburb
         current_user.postcode = postcode
@@ -291,10 +287,6 @@ def parent_profile_edit(profile_id):
 
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
-
-    if postcode and postcode not in POSTCODE_SUBURB:
-        flash("Invalid postcode. Please choose from the supported suburbs.", "danger")
-        return redirect(url_for("main.parent_profile", profile_id=profile_id))
 
     if suburb != current_user.suburb or postcode != current_user.postcode:
         current_user.suburb = suburb
