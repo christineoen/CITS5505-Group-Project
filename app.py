@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
@@ -6,12 +7,19 @@ from models.user import User
 
 csrf = CSRFProtect()
 
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
+
 
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "dev-secret-key"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+    app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     db.init_app(app)
     csrf.init_app(app)

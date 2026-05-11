@@ -26,9 +26,16 @@
 
                     <!-- Header -->
                     <div class="text-center mb-4">
-                        <div class="avatar-circle bg-primary mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
+                        {% if profile.user.photo_url %}
+                        <img src="{{ url_for('static', filename=profile.user.photo_url) }}"
+                             alt="{{ profile.user.name }}"
+                             class="rounded-circle mb-3 object-fit-cover"
+                             style="width:80px;height:80px;">
+                        {% else %}
+                        <div class="avatar-circle bg-success mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
                             {{ profile.user.name[0].upper() }}
                         </div>
+                        {% endif %}
                         <h3 class="fw-bold mb-1">{{ profile.user.name }}</h3>
                         <p class="text-muted mb-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
@@ -91,8 +98,41 @@
 
                     <!-- Edit mode -->
                     {% if is_own %}
-                    <form method="POST" action="{{ url_for('main.parent_profile_edit', profile_id=profile.id) }}" id="edit-form" class="d-none">
+                    <form method="POST"
+                          action="{{ url_for('main.parent_profile_edit', profile_id=profile.id) }}"
+                          id="edit-form"
+                          class="d-none"
+                          enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Photo upload -->
+                        <div class="mb-4 text-center">
+                            <div class="avatar-upload-wrapper mx-auto">
+                                {% if profile.user.photo_url %}
+                                <img src="{{ url_for('static', filename=profile.user.photo_url) }}"
+                                     alt="{{ profile.user.name }}"
+                                     id="photo-preview"
+                                     class="avatar-upload-img rounded-circle object-fit-cover">
+                                {% else %}
+                                <div class="avatar-circle bg-success avatar-upload-img" id="photo-placeholder"
+                                     style="font-size:2rem;">
+                                    {{ profile.user.name[0].upper() }}
+                                </div>
+                                <img id="photo-preview" class="avatar-upload-img rounded-circle object-fit-cover d-none"
+                                     alt="Preview">
+                                {% endif %}
+                                <div class="avatar-camera-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 16 16">
+                                        <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z"/>
+                                        <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
+                                    </svg>
+                                </div>
+                                <input type="file" name="photo" id="photo-input"
+                                       accept="image/png,image/jpeg,image/gif,image/webp"
+                                       class="avatar-file-input">
+                            </div>
+                            <div class="form-text mt-1">Click photo to change · PNG, JPG, GIF or WebP · max 5 MB</div>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Children</label>
