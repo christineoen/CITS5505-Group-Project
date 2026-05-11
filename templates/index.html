@@ -156,13 +156,21 @@
                             </svg>
                             {{ p.suburb or p.location }}
                         </p>
-                        <p class="text-muted small mb-0">
+                        <p class="text-muted small mb-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-briefcase-fill me-1" viewBox="0 0 16 16">
                                 <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5"/>
                                 <path d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85z"/>
                             </svg>
                             {{ p.experience_years }} yr{{ 's' if p.experience_years != 1 else '' }} experience
                         </p>
+                        {% if p.average_rating %}
+                        <p class="small mb-0">
+                            <span class="text-warning">★ {{ p.average_rating }}</span>
+                            <span class="text-muted">({{ p.rating_count }} review{{ 's' if p.rating_count != 1 else '' }})</span>
+                        </p>
+                        {% else %}
+                        <p class="text-muted small mb-0">No reviews yet</p>
+                        {% endif %}
                     </div>
 
                 </div>
@@ -195,12 +203,20 @@
                             </svg>
                             {{ p.suburb or p.location }}
                         </p>
-                        <p class="text-muted small mb-0">
+                        <p class="text-muted small mb-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-people-fill me-1" viewBox="0 0 16 16">
                                 <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
                             </svg>
                             {{ p.num_children }} child{{ 'ren' if p.num_children != 1 else '' }}
                         </p>
+                        {% if p.average_rating %}
+                        <p class="small mb-0">
+                            <span class="text-warning">★ {{ p.average_rating }}</span>
+                            <span class="text-muted">({{ p.rating_count }} review{{ 's' if p.rating_count != 1 else '' }})</span>
+                        </p>
+                        {% else %}
+                        <p class="text-muted small mb-0">No reviews yet</p>
+                        {% endif %}
                     </div>
 
                 </div>

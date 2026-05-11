@@ -68,3 +68,15 @@ class BookingForm(FlaskForm):
     )
     notes = TextAreaField("Notes (optional)", validators=[Optional(), Length(max=500)])
     submit = SubmitField("Request Booking")
+
+
+class RatingForm(FlaskForm):
+    score = IntegerField(
+        "Rating",
+        validators=[DataRequired(message="Please select a rating."), NumberRange(min=1, max=5)]
+    )
+    comment = TextAreaField(
+        "Comment (Optional)",
+        validators=[Optional(), Length(max=500, message="Comment must not exceed 500 characters.")]
+    )
+    submit = SubmitField("Submit Rating")
