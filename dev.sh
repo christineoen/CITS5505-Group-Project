@@ -9,7 +9,6 @@ python -c "from app import create_app; create_app()"
 
 echo "Seeding data..."
 python seed.py
-python seed_messages.py
 
 echo "Starting app..."
 python app.py

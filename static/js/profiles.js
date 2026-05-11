@@ -75,21 +75,34 @@ if (searchInput) {
 }
 
 // Profile edit/cancel toggle
-const editBtn   = document.getElementById('edit-btn');
-const cancelBtn = document.getElementById('cancel-btn');
-const viewMode  = document.getElementById('view-mode');
-const editForm  = document.getElementById('edit-form');
+const editBtn         = document.getElementById('edit-btn');
+const cancelBtn       = document.getElementById('cancel-btn');
+const viewMode        = document.getElementById('view-mode');
+const editForm        = document.getElementById('edit-form');
+const headerStatic    = document.getElementById('header-photo-static');
+const headerEdit      = document.getElementById('header-photo-edit');
+const reviewsSection  = document.getElementById('reviews-section');
 
 if (editBtn) {
     editBtn.addEventListener('click', function () {
         viewMode.classList.add('d-none');
         editForm.classList.remove('d-none');
+        if (headerStatic)   headerStatic.classList.add('d-none');
+        if (headerEdit)     headerEdit.classList.remove('d-none');
+        if (reviewsSection) reviewsSection.classList.add('d-none');
+        editBtn.classList.add('d-none');
+        if (cancelBtn) cancelBtn.classList.remove('d-none');
     });
 }
 if (cancelBtn) {
     cancelBtn.addEventListener('click', function () {
         editForm.classList.add('d-none');
         viewMode.classList.remove('d-none');
+        if (headerStatic)   headerStatic.classList.remove('d-none');
+        if (headerEdit)     headerEdit.classList.add('d-none');
+        if (reviewsSection) reviewsSection.classList.remove('d-none');
+        cancelBtn.classList.add('d-none');
+        if (editBtn) editBtn.classList.remove('d-none');
     });
 }
 
