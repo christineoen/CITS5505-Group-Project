@@ -10,6 +10,7 @@
     --charcoal: #4A4A4A;
     --light-gray: #F8F6F3;
     --medium-gray: #E8E4E0;
+    --bs-body-font-family: 'Inter', sans-serif;
 }
 
 /* ── Morandi Background Colors ── */
@@ -24,13 +25,13 @@
 .btn-sage {
     background-color: var(--sage);
     border-color: var(--sage);
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
     font-weight: 600;
 }
 .btn-sage:hover {
     background-color: #8A9B7A;
     border-color: #8A9B7A;
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
 }
 .btn-outline-sage {
     border-color: var(--sage);
@@ -39,74 +40,74 @@
 .btn-outline-sage:hover {
     background-color: var(--sage);
     border-color: var(--sage);
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
 }
 
-/* ── Override Bootstrap Primary Buttons with Morandi Theme ── */
+/* ── Bootstrap Button Theming (component CSS vars, no !important) ── */
 .btn-primary {
-    background-color: var(--sage) !important;
-    border-color: var(--sage) !important;
-    color: var(--charcoal) !important;
+    --bs-btn-bg: var(--sage);
+    --bs-btn-border-color: var(--sage);
+    --bs-btn-color: var(--charcoal);
+    --bs-btn-hover-bg: #8A9B7A;
+    --bs-btn-hover-border-color: #8A9B7A;
+    --bs-btn-hover-color: var(--charcoal);
+    --bs-btn-active-bg: #8A9B7A;
+    --bs-btn-active-border-color: #8A9B7A;
+    --bs-btn-active-color: var(--charcoal);
+    --bs-btn-focus-shadow-rgb: 156, 175, 136;
     font-weight: 600;
-}
-
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active {
-    background-color: #8A9B7A !important;
-    border-color: #8A9B7A !important;
-    color: var(--charcoal) !important;
-    box-shadow: 0 0 0 0.2rem rgba(156, 175, 136, 0.25) !important;
 }
 
 .btn-outline-primary {
-    border-color: var(--sage) !important;
-    color: var(--sage) !important;
-    background-color: transparent;
+    --bs-btn-color: var(--sage);
+    --bs-btn-border-color: var(--sage);
+    --bs-btn-hover-bg: var(--sage);
+    --bs-btn-hover-border-color: var(--sage);
+    --bs-btn-hover-color: var(--charcoal);
+    --bs-btn-active-bg: var(--sage);
+    --bs-btn-active-border-color: var(--sage);
+    --bs-btn-active-color: var(--charcoal);
+    --bs-btn-focus-shadow-rgb: 156, 175, 136;
 }
 
-.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active, .btn-outline-primary.active {
-    background-color: var(--sage) !important;
-    border-color: var(--sage) !important;
-    color: var(--charcoal) !important;
-    box-shadow: 0 0 0 0.2rem rgba(156, 175, 136, 0.25) !important;
-}
-
-/* ── Secondary Button Enhancements ── */
 .btn-secondary {
-    background-color: var(--warm-gray) !important;
-    border-color: var(--warm-gray) !important;
-    color: var(--charcoal) !important;
+    --bs-btn-bg: var(--warm-gray);
+    --bs-btn-border-color: var(--warm-gray);
+    --bs-btn-color: var(--charcoal);
+    --bs-btn-hover-bg: #A69688;
+    --bs-btn-hover-border-color: #A69688;
+    --bs-btn-hover-color: var(--charcoal);
+    --bs-btn-active-bg: #A69688;
+    --bs-btn-active-border-color: #A69688;
+    --bs-btn-active-color: var(--charcoal);
+    --bs-btn-focus-shadow-rgb: 184, 169, 154;
     font-weight: 600;
-}
-
-.btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active, .btn-secondary.active {
-    background-color: #A69688 !important;
-    border-color: #A69688 !important;
-    color: var(--charcoal) !important;
 }
 
 .btn-outline-secondary {
-    border-color: var(--warm-gray) !important;
-    color: var(--warm-gray) !important;
+    --bs-btn-color: var(--warm-gray);
+    --bs-btn-border-color: var(--warm-gray);
+    --bs-btn-hover-bg: var(--warm-gray);
+    --bs-btn-hover-border-color: var(--warm-gray);
+    --bs-btn-hover-color: var(--charcoal);
+    --bs-btn-active-bg: var(--warm-gray);
+    --bs-btn-active-border-color: var(--warm-gray);
+    --bs-btn-active-color: var(--charcoal);
+    --bs-btn-focus-shadow-rgb: 184, 169, 154;
 }
 
-.btn-outline-secondary:hover, .btn-outline-secondary:focus, .btn-outline-secondary:active, .btn-outline-secondary.active {
-    background-color: var(--warm-gray) !important;
-    border-color: var(--warm-gray) !important;
-    color: var(--charcoal) !important;
-}
-
-/* ── Success Button Enhancements ── */
 .btn-success {
-    background-color: var(--soft-blue) !important;
-    border-color: var(--soft-blue) !important;
-    color: var(--charcoal) !important;
+    --bs-btn-bg: var(--soft-blue);
+    --bs-btn-border-color: var(--soft-blue);
+    --bs-btn-color: var(--charcoal);
+    --bs-btn-hover-bg: #96B8CA;
+    --bs-btn-hover-border-color: #96B8CA;
+    --bs-btn-hover-color: var(--charcoal);
+    --bs-btn-active-bg: #96B8CA;
+    --bs-btn-active-border-color: #96B8CA;
+    --bs-btn-active-color: var(--charcoal);
+    --bs-btn-focus-shadow-rgb: 168, 196, 214;
     font-weight: 600;
-}
-
-.btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active {
-    background-color: #96B8CA !important;
-    border-color: #96B8CA !important;
-    color: var(--charcoal) !important;
 }
 
 /* ── Link Styling ── */
@@ -134,25 +135,25 @@ a:hover {
 
 .btn-hero-primary {
     background: var(--sage);
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
 }
 
 .btn-hero-primary:hover {
     background: #8A9B7A;
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(156, 175, 136, 0.3);
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
 }
 
 .btn-cta-primary {
     background: white;
-    color: var(--sage) !important;
+    color: var(--sage);
 }
 
 .btn-cta-primary:hover {
     background: var(--light-gray);
     transform: translateY(-2px);
-    color: var(--sage) !important;
+    color: var(--sage);
 }
 
 /* ── Hero Section ── */
@@ -386,14 +387,14 @@ a:hover {
 
 .btn-hero-primary {
     background: var(--sage);
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
 }
 
 .btn-hero-primary:hover {
     background: #8A9B7A;
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(156, 175, 136, 0.3);
-    color: var(--charcoal) !important;
+    color: var(--charcoal);
 }
 
 .btn-hero-secondary {
@@ -533,13 +534,13 @@ a:hover {
 
 .btn-cta-primary {
     background: white;
-    color: var(--sage) !important;
+    color: var(--sage);
 }
 
 .btn-cta-primary:hover {
     background: var(--light-gray);
     transform: translateY(-2px);
-    color: var(--sage) !important;
+    color: var(--sage);
 }
 
 .btn-cta-secondary {
@@ -715,9 +716,6 @@ a:hover {
 }
 
 /* ── Global Styles ── */
-body {
-    font-family: 'Inter', sans-serif !important;
-}
 
 .container {
     max-width: 1200px;
@@ -725,15 +723,15 @@ body {
 
 /* ── Card Enhancements ── */
 .card {
-    border-radius: 16px !important;
-    border: none !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 /* ── Form Enhancements ── */
@@ -748,6 +746,51 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(156, 175, 136, 0.25);
 }
 
+/* ── Babysitter card — clickable, button highlights on hover ── */
+.babysitter-card-link {
+    cursor: pointer;
+}
+
+.babysitter-card {
+    transition: box-shadow 0.15s ease;
+}
+
+.babysitter-card-link:hover .babysitter-card {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.babysitter-card-link:hover .view-profile-btn {
+    background-color: var(--sage);
+    border-color: var(--sage);
+    color: var(--charcoal);
+}
+
+.text-sage {
+    color: var(--sage);
+}
+
+/* ── Filter select — self-contained, no Bootstrap variable dependencies ── */
+.filter-select {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: #212529;
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.25rem 1.75rem 0.25rem 0.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 12px 9px;
+    cursor: pointer;
+    min-width: 130px;
+    height: calc(1.8125rem + 2px);
+    line-height: 1.5;
+}
+
 /* ── Badge Enhancements ── */
 .badge {
     font-weight: 500;
@@ -756,16 +799,16 @@ body {
 }
 
 .badge.bg-sage {
-    background-color: var(--sage) !important;
+    background-color: var(--sage);
 }
 
 .badge.bg-warm-gray {
-    background-color: var(--warm-gray) !important;
+    background-color: var(--warm-gray);
 }
 
 .badge.bg-soft-blue {
-    background-color: var(--soft-blue) !important;
-    color: var(--charcoal) !important;
+    background-color: var(--soft-blue);
+    color: var(--charcoal);
 }
 
 /* ── Avatar circle ── */
@@ -784,8 +827,8 @@ body {
 /* ── Welcome Section for Logged-in Users ── */
 .welcome-section {
     background: linear-gradient(135deg, var(--cream) 0%, var(--light-gray) 100%);
-    padding: 3rem 0;
-    margin-bottom: 2rem;
+    padding: 1.25rem 0;
+    margin-bottom: 1.25rem;
     border-radius: 16px;
     position: relative;
     overflow: hidden;
@@ -812,26 +855,29 @@ body {
 
 .welcome-text {
     flex: 1;
-    max-width: 600px;
 }
 
 .welcome-title {
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-size: 2rem;
     font-weight: 700;
     color: var(--charcoal);
-    margin-bottom: 1rem;
+    margin-bottom: 0.25rem;
     line-height: 1.2;
 }
 
-.welcome-name {
-    color: var(--sage);
+.welcome-subtitle {
+    font-size: 0.875rem;
+    color: #6B7280;
+    line-height: 1.5;
+    margin-bottom: 0;
 }
 
-.welcome-subtitle {
-    font-size: 1.1rem;
-    color: #6B7280;
-    line-height: 1.6;
-    margin-bottom: 0;
+.welcome-meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: 0.5rem;
 }
 
 .welcome-stats {
@@ -1527,50 +1573,6 @@ body {
         text-align: center;
         margin-top: 1rem;
     }
-}
-
-/* ── Booking Page Color Fixes ── */
-.alert-info {
-    background-color: rgba(168, 196, 214, 0.1) !important;
-    border-color: var(--soft-blue) !important;
-    color: var(--charcoal) !important;
-}
-
-.text-dark {
-    color: var(--charcoal) !important;
-}
-
-.fw-bold, .fw-semibold {
-    color: var(--charcoal) !important;
-}
-
-.form-label {
-    color: var(--charcoal) !important;
-}
-
-.small, small {
-    color: #6B7280 !important;
-}
-
-/* Alert border colors using Morandi palette */
-.alert {
-    border-left-color: var(--sage) !important;
-}
-
-.alert-danger {
-    border-left-color: #D4A5A5 !important;
-}
-
-.alert-warning {
-    border-left-color: var(--pale-terracotta) !important;
-}
-
-.alert-success {
-    border-left-color: var(--soft-blue) !important;
-}
-
-.alert-info {
-    border-left-color: var(--muted-lavender) !important;
 }
 
 /* ── Avatar photo upload ── */

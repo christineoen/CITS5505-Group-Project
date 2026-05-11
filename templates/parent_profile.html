@@ -57,7 +57,7 @@
                             <p class="fw-semibold mb-2">Children</p>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for child in profile.children %}
-                                <span class="badge bg-info text-dark px-3 py-2">
+                                <span class="badge bg-soft-blue text-dark px-3 py-2">
                                     {{ child.name }}{% if child.age is not none %}, age {{ child.age }}{% endif %}
                                 </span>
                                 {% endfor %}
