@@ -131,34 +131,19 @@ def booking(babysitter_id):
 def bookings():
     from datetime import date, time as time_type, datetime as dt
     from models.rating import Rating
-    parent_bookings = {}
-    babysitter_bookings = {}
+    parent_bookings = []
+    babysitter_bookings = []
     now = dt.now()
 
     if current_user.is_parent:
-        all_bookings = Booking.query.filter_by(
+        parent_bookings = Booking.query.filter_by(
             parent_id=current_user.parent_profile.id
         ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
-        parent_bookings = {
-            "pending":   [b for b in all_bookings if b.status == "pending"],
-            "accepted":  [b for b in all_bookings if b.status == "accepted"],
-            "rejected":  [b for b in all_bookings if b.status == "rejected"],
-            "cancelled": [b for b in all_bookings if b.status == "cancelled"],
-            "completed": [b for b in all_bookings if b.status == "completed"],
-        }
-
     if current_user.is_babysitter:
-        all_bookings = Booking.query.filter_by(
+        babysitter_bookings = Booking.query.filter_by(
             babysitter_id=current_user.babysitter_profile.id
         ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
-
-        babysitter_bookings = {
-            "pending":   [b for b in all_bookings if b.status == "pending"],
-            "accepted":  [b for b in all_bookings if b.status == "accepted"],
-            "rejected":  [b for b in all_bookings if b.status == "rejected"],
-            "completed": [b for b in all_bookings if b.status == "completed"],
-        }
 
     # Build a set of booking IDs already rated by current user
     from models.rating import Rating
@@ -281,7 +266,7 @@ def accept_booking(booking_id):
             other.status = "rejected"
 
     db.session.commit()
-    flash("Booking accepted. Overlapping requests have been rejected.", "success")
+    flash("Booking accepted.", "success")
     return redirect(url_for("main.bookings"))
 
 

@@ -38,6 +38,7 @@ BOOKING_PAIRS = [
     ("alice@example.com",  "ava@example.com",    -8, 11, 3, "pending",   ""),
     ("henry@example.com",  "ethan@example.com",  12, 10, 4, "completed", "Dietary restrictions - no gluten."),
     ("henry@example.com",  "oliver@example.com", -9, 15, 3, "pending",   ""),
+    ("sarah@example.com",  "emma@example.com",    2, 17, 3, "completed", "Kids had a great evening."),
 ]
 
 # Ratings for each completed booking: (parent_comment, parent_score, babysitter_comment, babysitter_score)
