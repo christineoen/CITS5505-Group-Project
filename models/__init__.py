@@ -7,3 +7,4 @@ from .babysitter_profile import BabysitterProfile
 from .parent_profile import ParentProfile
 from .booking import Booking
 from .message import Message
+from .rating import Rating

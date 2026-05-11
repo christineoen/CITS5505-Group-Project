@@ -6,7 +6,7 @@ from models import db
 from models.babysitter_profile import BabysitterProfile
 from models.parent_profile import ParentProfile
 from models.booking import Booking
-from forms import BookingForm
+from forms import BookingForm, RatingForm
 import json
 from utils import POSTCODE_SUBURB, DAYS, geocode_suburb
 
@@ -129,8 +129,11 @@ def booking(babysitter_id):
 @main_bp.route("/bookings")
 @login_required
 def bookings():
+    from datetime import date, time as time_type, datetime as dt
+    from models.rating import Rating
     parent_bookings = {}
     babysitter_bookings = {}
+    now = dt.now()
 
     if current_user.is_parent:
         all_bookings = Booking.query.filter_by(
@@ -142,6 +145,7 @@ def bookings():
             "accepted":  [b for b in all_bookings if b.status == "accepted"],
             "rejected":  [b for b in all_bookings if b.status == "rejected"],
             "cancelled": [b for b in all_bookings if b.status == "cancelled"],
+            "completed": [b for b in all_bookings if b.status == "completed"],
         }
 
     if current_user.is_babysitter:
@@ -150,16 +154,90 @@ def bookings():
         ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
         babysitter_bookings = {
-            "pending":  [b for b in all_bookings if b.status == "pending"],
-            "accepted": [b for b in all_bookings if b.status == "accepted"],
-            "rejected": [b for b in all_bookings if b.status == "rejected"],
+            "pending":   [b for b in all_bookings if b.status == "pending"],
+            "accepted":  [b for b in all_bookings if b.status == "accepted"],
+            "rejected":  [b for b in all_bookings if b.status == "rejected"],
+            "completed": [b for b in all_bookings if b.status == "completed"],
         }
+
+    # Build a set of booking IDs already rated by current user
+    from models.rating import Rating
+    rated_booking_ids = {
+        r.booking_id for r in Rating.query.filter_by(rater_id=current_user.id).all()
+    }
+
+    rating_form = RatingForm()
 
     return render_template(
         "bookings.html",
         parent_bookings=parent_bookings,
         babysitter_bookings=babysitter_bookings,
+        now=now,
+        rated_booking_ids=rated_booking_ids,
+        rating_form=rating_form,
     )
+
+
+@main_bp.route("/bookings/<int:booking_id>/rate", methods=["POST"])
+@login_required
+def rate_booking(booking_id):
+    from models.rating import Rating
+    b = Booking.query.get_or_404(booking_id)
+
+    # Determine who is being rated
+    if current_user.is_parent and b.parent_id == current_user.parent_profile.id:
+        ratee_id = b.babysitter.user_id
+    elif current_user.is_babysitter and b.babysitter_id == current_user.babysitter_profile.id:
+        ratee_id = b.parent.user_id
+    else:
+        abort(403)
+
+    if b.status != "completed":
+        flash("You can only rate completed bookings.", "warning")
+        return redirect(url_for("main.bookings"))
+
+    # Check already rated
+    if Rating.query.filter_by(booking_id=booking_id, rater_id=current_user.id).first():
+        flash("You have already rated this booking.", "info")
+        return redirect(url_for("main.bookings"))
+
+    form = RatingForm()
+    if form.validate_on_submit():
+        rating = Rating(
+            booking_id=booking_id,
+            rater_id=current_user.id,
+            ratee_id=ratee_id,
+            score=form.score.data,
+            comment=form.comment.data.strip() if form.comment.data else None,
+        )
+        db.session.add(rating)
+        db.session.commit()
+        flash("Rating submitted. Thank you!", "success")
+    else:
+        flash("Invalid rating. Please select a score between 1 and 5.", "danger")
+
+    return redirect(url_for("main.bookings"))
+
+
+@main_bp.route("/bookings/<int:booking_id>/complete", methods=["POST"])
+@login_required
+def complete_booking(booking_id):
+    from datetime import datetime as dt
+    b = Booking.query.get_or_404(booking_id)
+    if not current_user.is_parent or b.parent_id != current_user.parent_profile.id:
+        abort(403)
+    if b.status != "accepted":
+        flash("Only accepted bookings can be marked as completed.", "warning")
+        return redirect(url_for("main.bookings"))
+    # Booking start must have already begun
+    booking_start = dt.combine(b.date, b.start_time)
+    if dt.now() < booking_start:
+        flash("You can only complete a booking after it has started.", "warning")
+        return redirect(url_for("main.bookings"))
+    b.status = "completed"
+    db.session.commit()
+    flash("Booking marked as completed.", "success")
+    return redirect(url_for("main.bookings"))
 
 
 @main_bp.route("/bookings/<int:booking_id>/cancel", methods=["POST"])
@@ -235,7 +313,14 @@ def babysitter_profile(profile_id):
     import json
     days = json.loads(profile.availability) if profile.availability else []
     is_own = current_user.is_babysitter and current_user.babysitter_profile.id == profile_id
-    return render_template("babysitter_profile.html", profile=profile, days=days, is_own=is_own)
+    average_rating = profile.get_average_rating()
+    rating_count = profile.get_rating_count()
+    # Fetch all ratings received by this babysitter
+    from models.rating import Rating
+    reviews = Rating.query.filter_by(ratee_id=profile.user_id)\
+                          .order_by(Rating.created_at.desc()).all()
+    return render_template("babysitter_profile.html", profile=profile, days=days, is_own=is_own,
+                           average_rating=average_rating, rating_count=rating_count, reviews=reviews)
 
 
 @main_bp.route("/babysitter/<int:profile_id>/edit", methods=["POST"])
@@ -291,7 +376,13 @@ def babysitter_profile_edit(profile_id):
 def parent_profile(profile_id):
     profile = ParentProfile.query.get_or_404(profile_id)
     is_own = current_user.is_parent and current_user.parent_profile.id == profile_id
-    return render_template("parent_profile.html", profile=profile, is_own=is_own)
+    average_rating = profile.get_average_rating()
+    rating_count = profile.get_rating_count()
+    from models.rating import Rating
+    reviews = Rating.query.filter_by(ratee_id=profile.user_id)\
+                          .order_by(Rating.created_at.desc()).all()
+    return render_template("parent_profile.html", profile=profile, is_own=is_own,
+                           average_rating=average_rating, rating_count=rating_count, reviews=reviews)
 
 
 @main_bp.route("/parent/<int:profile_id>/edit", methods=["POST"])

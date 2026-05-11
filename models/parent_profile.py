@@ -12,6 +12,16 @@ class ParentProfile(db.Model):
 
     user = db.relationship("User", back_populates="parent_profile")
 
+    def get_average_rating(self):
+        from models.rating import Rating
+        from sqlalchemy import func
+        result = db.session.query(func.avg(Rating.score)).filter_by(ratee_id=self.user_id).scalar()
+        return round(float(result), 1) if result else None
+
+    def get_rating_count(self):
+        from models.rating import Rating
+        return Rating.query.filter_by(ratee_id=self.user_id).count()
+
     def to_card(self):
         postcode = self.user.postcode or ""
         suburb = self.user.suburb or POSTCODE_SUBURB.get(postcode, "")
@@ -24,6 +34,8 @@ class ParentProfile(db.Model):
             "about": self.about or "",
             "lat": self.user.latitude,
             "lng": self.user.longitude,
+            "average_rating": self.get_average_rating(),
+            "rating_count": self.get_rating_count(),
         }
 
     def __repr__(self):
