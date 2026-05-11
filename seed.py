@@ -4,6 +4,7 @@ from models.user import User
 from models.babysitter_profile import BabysitterProfile
 from models.parent_profile import ParentProfile
 from utils import POSTCODE_COORDS
+from seed_messages import seed_bookings_and_messages
 
 BABYSITTERS = [
     {"name": "Emma Sits", "email": "emma@example.com", "suburb": "Subiaco", "postcode": "6008", "bio": "Experienced nanny with a love for arts and crafts.", "hourly_rate": 22.0, "experience_years": 4, "availability": '["Mon", "Tue", "Wed"]'},
@@ -71,6 +72,8 @@ def seed():
 
         db.session.commit()
         print("\nSeed complete.")
+
+    seed_bookings_and_messages()
 
 
 if __name__ == "__main__":
