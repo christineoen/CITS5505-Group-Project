@@ -22,7 +22,7 @@
                 </h1>
                 <p class="welcome-subtitle">
                     {% if current_user.is_parent %}
-                    Find trusted babysitters for your family. Select a profile to send a message and schedule time.
+                    Find trusted babysitters for your family. Select a profile to send messages and schedule time.
                     {% set pp = current_user.parent_profile %}
                     {% if current_user.suburb or (pp and pp.children) %}
                     <span class="welcome-meta">
@@ -136,9 +136,14 @@
                 <div class="card-body px-3 pt-3 pb-2 d-flex flex-column">
 
                     <div class="d-flex align-items-center gap-3 mb-2">
+                        {% if p.photo_url %}
+                        <img src="{{ url_for('static', filename=p.photo_url) }}" alt="{{ p.name }}"
+                             class="avatar-circle flex-shrink-0 object-fit-cover">
+                        {% else %}
                         <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} flex-shrink-0">
                             {{ p.name[0].upper() }}
                         </div>
+                        {% endif %}
                         <div class="d-flex justify-content-between align-items-center flex-grow-1 min-w-0">
                             <h5 class="fw-semibold mb-0 text-dark">{{ p.name }}</h5>
                             <span class="fw-semibold text-sage ms-2 flex-shrink-0">${{ "%.0f"|format(p.hourly_rate) }}/hr</span>
@@ -186,9 +191,14 @@
                 <div class="card-body px-3 pt-3 pb-2 d-flex flex-column">
 
                     <div class="d-flex align-items-center gap-3 mb-2">
+                        {% if p.photo_url %}
+                        <img src="{{ url_for('static', filename=p.photo_url) }}" alt="{{ p.name }}"
+                             class="avatar-circle flex-shrink-0 object-fit-cover">
+                        {% else %}
                         <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} flex-shrink-0">
                             {{ p.name[0].upper() }}
                         </div>
+                        {% endif %}
                         <h5 class="fw-semibold mb-0 text-dark">{{ p.name }}</h5>
                     </div>
 

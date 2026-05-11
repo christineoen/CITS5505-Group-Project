@@ -41,6 +41,7 @@ class BabysitterProfile(db.Model):
             "lng": self.user.longitude,
             "average_rating": self.get_average_rating(),
             "rating_count": self.get_rating_count(),
+            "photo_url": self.user.photo_url or "",
         }
 
     def __repr__(self):
