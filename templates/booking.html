@@ -37,10 +37,17 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                    {% if babysitter.user.photo_url %}
+                    <img src="{{ url_for('static', filename=babysitter.user.photo_url) }}"
+                         alt="{{ babysitter.user.name }}"
+                         class="rounded-circle object-fit-cover me-3"
+                         style="width: 60px; height: 60px;">
+                    {% else %}
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
                          style="width: 60px; height: 60px; font-size: 24px; font-weight: bold;">
                         {{ babysitter.user.name[0].upper() }}
                     </div>
+                    {% endif %}
                     <div>
                         <h4 class="mb-1 fw-bold">{{ babysitter.user.name }}</h4>
                         <div class="text-muted small">
