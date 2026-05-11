@@ -17,11 +17,9 @@ function haversineKm(lat1, lng1, lat2, lng2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-const KM_PER_MILE = 1.609;
-
 function applyFilters() {
     const activeDays = [...dayBtns].filter(btn => btn.classList.contains('active')).map(btn => btn.dataset.day);
-    const distanceMiles = distanceSelect ? parseFloat(distanceSelect.value) || 0 : 0;
+    const distanceKm = distanceSelect ? parseFloat(distanceSelect.value) || 0 : 0;
     let visible = 0;
 
     cardCols.forEach(col => {
@@ -32,9 +30,8 @@ function applyFilters() {
         const dayMatch = activeDays.length === 0 || activeDays.some(d => colDays.includes(d));
 
         let distanceMatch = true;
-        if (distanceMiles && userLat && userLng && !isNaN(colLat) && !isNaN(colLng)) {
-            const distKm = haversineKm(userLat, userLng, colLat, colLng);
-            distanceMatch = distKm <= distanceMiles * KM_PER_MILE;
+        if (distanceKm && userLat && userLng && !isNaN(colLat) && !isNaN(colLng)) {
+            distanceMatch = haversineKm(userLat, userLng, colLat, colLng) <= distanceKm;
         }
 
         const show = dayMatch && distanceMatch;
@@ -81,15 +78,14 @@ let mapMarkers = [];
 function applyMapFilters() {
     if (!browseMap) return;
     const activeDays = [...dayBtns].filter(btn => btn.classList.contains('active')).map(btn => btn.dataset.day);
-    const distanceMiles = distanceSelect ? parseFloat(distanceSelect.value) || 0 : 0;
+    const distanceKm = distanceSelect ? parseFloat(distanceSelect.value) || 0 : 0;
 
     mapMarkers.forEach(({ marker, profile: p }) => {
         const dayMatch = activeDays.length === 0 || activeDays.some(d => p.days.includes(d));
 
         let distanceMatch = true;
-        if (distanceMiles && userLat && userLng && p.lat != null && p.lng != null) {
-            const distKm = haversineKm(userLat, userLng, p.lat, p.lng);
-            distanceMatch = distKm <= distanceMiles * KM_PER_MILE;
+        if (distanceKm && userLat && userLng && p.lat != null && p.lng != null) {
+            distanceMatch = haversineKm(userLat, userLng, p.lat, p.lng) <= distanceKm;
         }
 
         if (dayMatch && distanceMatch) {
