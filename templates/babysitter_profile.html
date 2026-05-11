@@ -149,7 +149,9 @@
                         {% if current_user.is_parent %}
                         <div class="d-flex gap-2 mt-4">
                             <a href="{{ url_for('main.booking', babysitter_id=profile.id) }}" class="btn btn-primary flex-fill">Book Now</a>
-                            <a href="{{ url_for('messages.index') }}" class="btn btn-outline-primary flex-fill">Message</a>
+                            {% if has_booking %}
+                            <a href="{{ url_for('messages.index') }}?user_id={{ profile.user.id }}" class="btn btn-outline-primary flex-fill">Message</a>
+                            {% endif %}
                         </div>
                         {% endif %}
 

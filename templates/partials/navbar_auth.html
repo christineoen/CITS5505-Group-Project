@@ -17,13 +17,15 @@
                         <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'main.index' }}"
                            href="{{ url_for('main.index') }}" style="color: var(--charcoal);">Home</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item position-relative">
                         <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'main.bookings' }}"
                            href="{{ url_for('main.bookings') }}" style="color: var(--charcoal);">Bookings</a>
+                        <span id="navbar-pending-badge" class="navbar-unread-badge d-none"></span>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'main.messages' }}"
-                           href="{{ url_for('main.messages') }}" style="color: var(--charcoal);">Messages</a>
+                    <li class="nav-item position-relative">
+                        <a class="nav-link fw-semibold {{ 'active' if request.endpoint == 'messages.index' }}"
+                           href="{{ url_for('messages.index') }}" style="color: var(--charcoal);">Messages</a>
+                        <span id="navbar-unread-badge" class="navbar-unread-badge d-none"></span>
                     </li>
                 </ul>
 

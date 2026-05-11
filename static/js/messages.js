@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial conversations and setup refresh interval
     loadConversations();
     setInterval(loadConversations, 30000); // Refresh every 30 seconds
+    
+    // Check for user_id parameter to auto-open conversation
+    checkForAutoOpenConversation();
 });
 
 /**
@@ -124,16 +127,25 @@ async function loadConversations() {
             `;
         }).join('');
         
+        // Update navbar unread badge
+        updateNavbarUnreadBadge(conversations);
+        
+        // Check if we need to auto-open a conversation with specific user
+        autoOpenConversationWithUser(conversations);
+        
     } catch (error) {
         console.error('Error loading conversations:', error);
-        document.getElementById('conversations-list').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">⚠️</div>
-                <div class="empty-state-title">Failed to load conversations</div>
-                <div class="empty-state-text">Please check your connection and try again</div>
-                <button class="btn btn-primary btn-sm mt-2" onclick="loadConversations()">Retry</button>
-            </div>
-        `;
+        const conversationsList = document.getElementById('conversations-list');
+        if (conversationsList) {
+            conversationsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <div class="empty-state-title">Failed to load conversations</div>
+                    <div class="empty-state-text">Please check your connection and try again</div>
+                    <button class="btn btn-primary btn-sm mt-2" onclick="loadConversations()">Retry</button>
+                </div>
+            `;
+        }
     } finally {
         isLoading = false;
     }
@@ -203,9 +215,12 @@ async function loadConversation(bookingId, forceReload = false) {
         // Display messages with enhanced formatting
         displayMessages(data.messages);
         
-        // Update conversation list to show active state
-        loadConversations();
+        // Update conversation list to show active state (but don't reload if we're already loading)
+        if (!isLoading) {
+            loadConversations();
+        }
         
+        // Clear loading state after content is loaded
         hideLoadingState();
         
     } catch (error) {
@@ -442,10 +457,13 @@ async function performStatusUpdate(status) {
         isLoading = true;
         confirmationModal.hide();
         
-        // Disable action buttons
+        // Show loading state on all action buttons
         const buttons = document.querySelectorAll('.action-btn');
         buttons.forEach(btn => {
             btn.disabled = true;
+            if (!btn.dataset.originalText) {
+                btn.dataset.originalText = btn.textContent;
+            }
             btn.innerHTML = '<div class="loading-spinner"></div> Processing...';
         });
         
@@ -462,19 +480,32 @@ async function performStatusUpdate(status) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const result = await response.json();
+        await response.json(); // Consume response but don't store unused result
+        
+        // Update current booking status
+        currentBookingStatus = status;
         
         // Show success message
         showSuccessMessage(`Booking ${status} successfully!`);
         
-        // Reload conversation and list
-        await refreshMessages();
+        // Update UI to show only the selected action
+        updateButtonsAfterStatusChange(status);
+        
+        // Update navbar pending bookings badge (if function exists from navbar-unread.js)
+        if (typeof updateNavbarPendingCount === 'function') {
+            updateNavbarPendingCount();
+        }
+        
+        // Refresh messages to show the system message (but don't reload entire conversation)
+        setTimeout(async () => {
+            await refreshMessages();
+        }, 500); // Small delay to ensure server has processed the status change
         
     } catch (error) {
         console.error('Error updating booking status:', error);
         showErrorMessage(`Failed to ${status} booking. Please try again.`);
         
-        // Re-enable buttons
+        // Re-enable buttons on error
         const buttons = document.querySelectorAll('.action-btn');
         buttons.forEach(btn => {
             btn.disabled = false;
@@ -482,6 +513,36 @@ async function performStatusUpdate(status) {
         });
     } finally {
         isLoading = false;
+    }
+}
+
+// Update button display after status change
+function updateButtonsAfterStatusChange(newStatus) {
+    const babysitterActions = document.getElementById('babysitter-actions');
+    
+    if (newStatus === 'accepted') {
+        // Show only accepted state
+        babysitterActions.innerHTML = `
+            <div class="alert alert-success mb-0">
+                <strong>✅ Booking Accepted</strong><br>
+                You have accepted this booking request. The parent has been notified.
+            </div>
+        `;
+    } else if (newStatus === 'rejected') {
+        // Show only rejected state
+        babysitterActions.innerHTML = `
+            <div class="alert alert-danger mb-0">
+                <strong>❌ Booking Rejected</strong><br>
+                You have declined this booking request. The parent has been notified.
+            </div>
+        `;
+    }
+    
+    // Update the status badge in the header
+    const statusBadge = document.getElementById('booking-status-badge');
+    if (statusBadge) {
+        statusBadge.textContent = newStatus.toUpperCase();
+        statusBadge.className = `status-badge ${getStatusClass(newStatus)}`;
     }
 }
 
@@ -553,7 +614,25 @@ function showLoadingState() {
 }
 
 function hideLoadingState() {
-    // Loading state will be replaced by actual content
+    // Simply remove loading state - don't trigger additional loads
+    // The calling function will handle content updates
+    const container = document.getElementById('messages-container');
+    
+    // Only clear loading if container currently shows loading
+    const loadingElement = container.querySelector('.loading-spinner');
+    if (loadingElement) {
+        // If no conversation is selected, show the default state
+        if (!currentBookingId) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div class="empty-state-title">Select a conversation</div>
+                    <div class="empty-state-text">Choose a conversation from the left to start messaging</div>
+                </div>
+            `;
+        }
+        // If conversation is selected, the calling function will populate content
+    }
 }
 
 function showErrorMessage(message) {
@@ -594,4 +673,64 @@ function showSuccessMessage(message) {
             toast.parentNode.removeChild(toast);
         }
     }, 3000);
+}
+
+/**
+ * Update the navbar unread message badge (local version for messages page)
+ * @param {Array} conversations - Array of conversation objects
+ */
+function updateNavbarUnreadBadge(conversations) {
+    const navbarBadge = document.getElementById('navbar-unread-badge');
+    if (!navbarBadge) return; // Badge element doesn't exist
+    
+    // Calculate total unread messages across all conversations
+    const totalUnread = conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0);
+    
+    if (totalUnread > 0) {
+        navbarBadge.textContent = totalUnread > 99 ? '99+' : totalUnread.toString();
+        navbarBadge.classList.remove('d-none');
+    } else {
+        navbarBadge.classList.add('d-none');
+    }
+}
+
+/**
+ * Check URL parameters for auto-opening conversations
+ */
+function checkForAutoOpenConversation() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+    
+    if (userId) {
+        // Store the target user ID to open conversation once conversations are loaded
+        window.targetUserId = parseInt(userId);
+        
+        // Clean up URL without refreshing page
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+}
+
+/**
+ * Auto-open conversation with specific user (called after conversations are loaded)
+ * @param {Array} conversations - Array of conversation objects
+ */
+function autoOpenConversationWithUser(conversations) {
+    if (!window.targetUserId) return;
+    
+    // Find conversation with the target user
+    const targetConversation = conversations.find(conv => 
+        conv.other_user.id === window.targetUserId
+    );
+    
+    if (targetConversation) {
+        // Open the conversation
+        loadConversation(targetConversation.booking_id);
+        // Clear the target user ID
+        window.targetUserId = null;
+    } else {
+        // Show message if no conversation exists with this user
+        showErrorMessage('No conversation found with this user. You may need to create a booking first.');
+        window.targetUserId = null;
+    }
 }
