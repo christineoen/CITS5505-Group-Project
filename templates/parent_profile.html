@@ -26,7 +26,7 @@
 
                     <!-- Header -->
                     <div class="text-center mb-4">
-                        <div class="avatar-circle bg-success mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
+                        <div class="avatar-circle bg-primary mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;">
                             {{ profile.user.name[0].upper() }}
                         </div>
                         <h3 class="fw-bold mb-1">{{ profile.user.name }}</h3>
@@ -50,7 +50,7 @@
                             <p class="fw-semibold mb-2">Children</p>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for child in profile.children %}
-                                <span class="badge bg-info text-dark px-3 py-2">
+                                <span class="badge bg-soft-blue text-dark px-3 py-2">
                                     {{ child.name }}{% if child.age is not none %}, age {{ child.age }}{% endif %}
                                 </span>
                                 {% endfor %}

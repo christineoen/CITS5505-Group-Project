@@ -1,23 +1,43 @@
-const locationSelect = document.getElementById('filter-location');
-const dayCheckboxes = document.querySelectorAll('.day-filter');
+const distanceSelect = document.getElementById('filter-distance');
+const dayBtns = document.querySelectorAll('.day-filter-btn');
 const cardCols = document.querySelectorAll('.card-col');
 const resultsCount = document.getElementById('results-count');
 const noResults = document.getElementById('no-results');
 const grid = document.getElementById('cards-grid');
 
+const userLat = window._userLat || null;
+const userLng = window._userLng || null;
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const KM_PER_MILE = 1.609;
+
 function applyFilters() {
-    const location = locationSelect ? locationSelect.value : '';
-    const checkedDays = [...dayCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+    const activeDays = [...dayBtns].filter(btn => btn.classList.contains('active')).map(btn => btn.dataset.day);
+    const distanceMiles = distanceSelect ? parseFloat(distanceSelect.value) || 0 : 0;
     let visible = 0;
 
     cardCols.forEach(col => {
-        const colLocation = col.dataset.location || '';
         const colDays = col.dataset.days ? col.dataset.days.split(',') : [];
+        const colLat = parseFloat(col.dataset.lat);
+        const colLng = parseFloat(col.dataset.lng);
 
-        const locationMatch = !location || colLocation === location;
-        const dayMatch = checkedDays.length === 0 || checkedDays.some(d => colDays.includes(d));
+        const dayMatch = activeDays.length === 0 || activeDays.some(d => colDays.includes(d));
 
-        const show = locationMatch && dayMatch;
+        let distanceMatch = true;
+        if (distanceMiles && userLat && userLng && !isNaN(colLat) && !isNaN(colLng)) {
+            const distKm = haversineKm(userLat, userLng, colLat, colLng);
+            distanceMatch = distKm <= distanceMiles * KM_PER_MILE;
+        }
+
+        const show = dayMatch && distanceMatch;
         col.style.display = show ? '' : 'none';
         if (show) visible++;
     });
@@ -31,13 +51,16 @@ function applyFilters() {
 }
 
 function clearFilters() {
-    if (locationSelect) locationSelect.value = '';
-    dayCheckboxes.forEach(cb => cb.checked = false);
+    if (distanceSelect) distanceSelect.value = '';
+    dayBtns.forEach(btn => btn.classList.remove('active'));
     applyFilters();
 }
 
-if (locationSelect) locationSelect.addEventListener('change', applyFilters);
-dayCheckboxes.forEach(cb => cb.addEventListener('change', applyFilters));
+dayBtns.forEach(btn => btn.addEventListener('click', function () {
+    this.classList.toggle('active');
+    applyFilters();
+}));
+if (distanceSelect) distanceSelect.addEventListener('change', applyFilters);
 
 const clearBtn = document.getElementById('clear-filters');
 const clearBtnEmpty = document.getElementById('clear-filters-empty');
@@ -57,13 +80,19 @@ let mapMarkers = [];
 
 function applyMapFilters() {
     if (!browseMap) return;
-    const location   = locationSelect ? locationSelect.value : '';
-    const checkedDays = [...dayCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+    const activeDays = [...dayBtns].filter(btn => btn.classList.contains('active')).map(btn => btn.dataset.day);
+    const distanceMiles = distanceSelect ? parseFloat(distanceSelect.value) || 0 : 0;
 
     mapMarkers.forEach(({ marker, profile: p }) => {
-        const locationMatch = !location || p.location === location;
-        const dayMatch = checkedDays.length === 0 || checkedDays.some(d => p.days.includes(d));
-        if (locationMatch && dayMatch) {
+        const dayMatch = activeDays.length === 0 || activeDays.some(d => p.days.includes(d));
+
+        let distanceMatch = true;
+        if (distanceMiles && userLat && userLng && p.lat != null && p.lng != null) {
+            const distKm = haversineKm(userLat, userLng, p.lat, p.lng);
+            distanceMatch = distKm <= distanceMiles * KM_PER_MILE;
+        }
+
+        if (dayMatch && distanceMatch) {
             marker.addTo(browseMap);
         } else {
             marker.remove();

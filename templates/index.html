@@ -18,95 +18,101 @@
         <div class="welcome-content">
             <div class="welcome-text">
                 <h1 class="welcome-title">
-                    Welcome back, <span class="welcome-name">{{ current_user.name }}</span>!
+                    Welcome, {{ current_user.name }}!
                 </h1>
                 <p class="welcome-subtitle">
                     {% if current_user.is_parent %}
-                    Find trusted babysitters for your family. Browse profiles, read reviews, and book with confidence.
+                    Find trusted babysitters for your family. Select a profile to send a message and schedule time.
+                    {% set pp = current_user.parent_profile %}
+                    {% if current_user.suburb or (pp and pp.children) %}
+                    <span class="welcome-meta">
+                        {% if current_user.suburb %}
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                            </svg>
+                            {{ current_user.suburb }}
+                        </span>
+                        {% endif %}
+                        {% if pp and pp.children %}
+                        <span>
+                            {% for child in pp.children %}{{ child.name or 'Child' }}, age {{ child.age }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
+                        </span>
+                        {% endif %}
+                    </span>
+                    {% endif %}
                     {% else %}
                     Connect with families who need your care. Manage your bookings and build lasting relationships.
+                    {% set bp = current_user.babysitter_profile %}
+                    {% if current_user.suburb or (bp and (bp.experience_years is not none or bp.hourly_rate)) %}
+                    <span class="welcome-meta">
+                        {% if current_user.suburb %}
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                            </svg>
+                            {{ current_user.suburb }}
+                        </span>
+                        {% endif %}
+                        {% if bp and bp.experience_years is not none %}
+                        <span>{{ bp.experience_years }} yr{{ 's' if bp.experience_years != 1 else '' }} experience</span>
+                        {% endif %}
+                        {% if bp and bp.hourly_rate %}
+                        <span>${{ "%.0f"|format(bp.hourly_rate) }}/hr</span>
+                        {% endif %}
+                    </span>
+                    {% endif %}
                     {% endif %}
                 </p>
-            </div>
-            <div class="welcome-stats">
-                <div class="welcome-stat">
-                    <div class="welcome-stat-number">{{ profiles|length }}</div>
-                    <div class="welcome-stat-label">
-                        {% if current_user.is_parent %}Available Sitters{% else %}Families Nearby{% endif %}
-                    </div>
-                </div>
-                <div class="welcome-stat">
-                    <div class="welcome-stat-number">4.9</div>
-                    <div class="welcome-stat-label">Average Rating</div>
-                </div>
-                <div class="welcome-stat">
-                    <div class="welcome-stat-number">24/7</div>
-                    <div class="welcome-stat-label">Support</div>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container">
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h2 class="fw-bold mb-0">
-            {% if mode == 'babysitters' %}Browse Babysitters{% else %}Browse Parents{% endif %}
-        </h2>
-        <p class="text-muted mb-0 mt-1">
-            <span id="results-count">{{ profiles|length }}</span> result{{ 's' if profiles|length != 1 else '' }}
-        </p>
-    </div>
-    <div class="btn-group" role="group" aria-label="View toggle">
-        <button id="btn-list" type="button" class="btn btn-primary btn-sm px-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-grid-3x2-gap me-1" viewBox="0 0 16 16">
-                <path d="M4 4v2H2V4zm1-1H1v4h4zm6 1v2H9V4zm1-1H8v4h4zM4 9v2H2V9zm1-1H1v4h4zm6 1v2H9V9zm1-1H8v4h4zm-3 6v2H2v-2zm1-1H1v4h4zm6 1v2H9v-2zm1-1H8v4h4z"/>
-            </svg>
-            List
-        </button>
-        <button id="btn-map" type="button" class="btn btn-outline-secondary btn-sm px-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-map me-1" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
-            </svg>
-            Map
-        </button>
-    </div>
-</div>
+<h2 class="fw-bold mb-2 fs-5">
+    {% if mode == 'babysitters' %}Browse Babysitters{% else %}Browse Parents{% endif %}
+</h2>
 
 {# Filter bar #}
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-body py-3">
-        <div class="row g-3 align-items-end">
+<div class="filter-bar d-flex align-items-center flex-wrap gap-3 mb-4 bg-white rounded shadow-sm px-3 py-2">
+    {% if mode == 'babysitters' %}
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="fw-semibold small">Available on</span>
+        {% for day in days %}
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill day-filter-btn" data-day="{{ day }}">{{ day }}</button>
+        {% endfor %}
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="fw-semibold small">Within</span>
+        <select id="filter-distance" class="filter-select">
+            <option value="">Any distance</option>
+            <option value="5">5 miles</option>
+            <option value="10">10 miles</option>
+            <option value="20">20 miles</option>
+            <option value="50">50 miles</option>
+        </select>
+    </div>
+    {% else %}
+    <div class="d-flex align-items-center gap-2">
+        <span class="fw-semibold small">Within</span>
+        <select id="filter-distance" class="filter-select">
+            <option value="">Any distance</option>
+            <option value="5">5 miles</option>
+            <option value="10">10 miles</option>
+            <option value="20">20 miles</option>
+            <option value="50">50 miles</option>
+        </select>
+    </div>
+    {% endif %}
 
-            <div class="col-sm-6 col-lg-3">
-                <label class="form-label fw-semibold mb-1">Location</label>
-                <select id="filter-location" class="form-select">
-                    <option value="">All locations</option>
-                    {% for loc in locations %}
-                    <option value="{{ loc }}">{{ postcode_suburb.get(loc, loc) }} ({{ loc }})</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            {% if mode == 'babysitters' %}
-            <div class="col-sm-12 col-lg-7">
-                <label class="form-label fw-semibold mb-1">Available on</label>
-                <div class="d-flex flex-wrap gap-2">
-                    {% for day in days %}
-                    <div class="form-check form-check-inline me-0">
-                        <input class="form-check-input day-filter" type="checkbox" value="{{ day }}" id="day-{{ day }}">
-                        <label class="form-check-label" for="day-{{ day }}">{{ day }}</label>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="col-sm-6 col-lg-2 ms-auto">
-                <button id="clear-filters" class="btn btn-outline-secondary w-100">Clear</button>
-            </div>
-
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="text-muted small">
+            <span id="results-count">{{ profiles|length }}</span> result{{ 's' if profiles|length != 1 else '' }}
+        </span>
+        <div class="btn-group" role="group" aria-label="View toggle">
+            <button id="btn-list" type="button" class="btn btn-primary btn-sm px-3">List</button>
+            <button id="btn-map" type="button" class="btn btn-outline-secondary btn-sm px-3">Map</button>
         </div>
     </div>
 </div>
@@ -120,62 +126,91 @@
     {% for p in profiles %}
     <div class="col-sm-6 col-lg-4 card-col"
          data-location="{{ p.location }}"
+         data-lat="{{ p.lat or '' }}"
+         data-lng="{{ p.lng or '' }}"
          {% if mode == 'babysitters' %}data-days="{{ p.days | join(',') }}"{% endif %}>
 
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-body text-center px-4 pt-4 pb-2">
+        {% if mode == 'babysitters' %}
+        <a href="{{ url_for('main.babysitter_profile', profile_id=p.id) }}" class="babysitter-card-link text-decoration-none d-block h-100">
+            <div class="card h-100 shadow-sm border-0 babysitter-card">
+                <div class="card-body px-3 pt-3 pb-2 d-flex flex-column">
 
-                <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} mx-auto mb-3">
-                    {{ p.name[0].upper() }}
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} flex-shrink-0">
+                            {{ p.name[0].upper() }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center flex-grow-1 min-w-0">
+                            <h5 class="fw-semibold mb-0 text-dark">{{ p.name }}</h5>
+                            <span class="fw-semibold text-sage ms-2 flex-shrink-0">${{ "%.0f"|format(p.hourly_rate) }}/hr</span>
+                        </div>
+                    </div>
+
+                    {% if p.bio %}
+                    <p class="text-muted small mb-3">{{ p.bio[:90] }}{% if p.bio|length > 90 %}…{% endif %}</p>
+                    {% endif %}
+
+                    <div class="mt-auto">
+                        <p class="text-muted small mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                            </svg>
+                            {{ p.suburb or p.location }}
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-briefcase-fill me-1" viewBox="0 0 16 16">
+                                <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5"/>
+                                <path d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85z"/>
+                            </svg>
+                            {{ p.experience_years }} yr{{ 's' if p.experience_years != 1 else '' }} experience
+                        </p>
+                    </div>
+
                 </div>
-
-                <h5 class="card-title mb-1 fw-semibold">{{ p.name }}</h5>
-                <p class="text-muted small mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
-                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
-                    </svg>
-                    {{ p.suburb }} {{ p.location }}
-                </p>
-
-                {% if mode == 'babysitters' %}
-                <div class="d-flex justify-content-center gap-2 mb-3 flex-wrap">
-                    <span class="badge bg-sage">${{ "%.0f"|format(p.hourly_rate) }}/hr</span>
-                    <span class="badge bg-warm-gray">{{ p.experience_years }} yr{{ 's' if p.experience_years != 1 else '' }} exp</span>
+                <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-2">
+                    <span class="btn btn-outline-sage btn-sm w-100 view-profile-btn">View Profile</span>
                 </div>
-                <div class="d-flex justify-content-center flex-wrap gap-1 mb-3">
-                    {% for day in p.days %}
-                    <span class="badge rounded-pill border text-secondary bg-light">{{ day }}</span>
-                    {% endfor %}
-                </div>
-                {% if p.bio %}
-                <p class="card-text text-muted small text-start">
-                    {{ p.bio[:100] }}{% if p.bio|length > 100 %}…{% endif %}
-                </p>
-                {% endif %}
-
-                {% else %}
-                <div class="mb-3">
-                    <span class="badge bg-soft-blue text-dark">
-                        {{ p.num_children }} child{{ 'ren' if p.num_children != 1 else '' }}
-                    </span>
-                </div>
-                {% if p.about %}
-                <p class="card-text text-muted small text-start">
-                    {{ p.about[:100] }}{% if p.about|length > 100 %}…{% endif %}
-                </p>
-                {% endif %}
-                {% endif %}
-
             </div>
-            <div class="card-footer bg-transparent border-0 text-center pb-3">
-                {% if mode == 'babysitters' %}
-                <a href="{{ url_for('main.babysitter_profile', profile_id=p.id) }}" class="btn btn-outline-sage btn-sm px-4 me-1">View Profile</a>
-                <a href="{{ url_for('main.booking', babysitter_id=p.id) }}" class="btn btn-sage btn-sm px-4">Book Now</a>
-                {% else %}
-                <a href="{{ url_for('main.parent_profile', profile_id=p.id) }}" class="btn btn-sage btn-sm px-4">View Profile</a>
-                {% endif %}
+        </a>
+
+        {% else %}
+        <a href="{{ url_for('main.parent_profile', profile_id=p.id) }}" class="babysitter-card-link text-decoration-none d-block h-100">
+            <div class="card h-100 shadow-sm border-0 babysitter-card">
+                <div class="card-body px-3 pt-3 pb-2 d-flex flex-column">
+
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="avatar-circle bg-{{ avatar_colors[loop.index0 % avatar_colors|length] }} flex-shrink-0">
+                            {{ p.name[0].upper() }}
+                        </div>
+                        <h5 class="fw-semibold mb-0 text-dark">{{ p.name }}</h5>
+                    </div>
+
+                    {% if p.about %}
+                    <p class="text-muted small mb-3">{{ p.about[:90] }}{% if p.about|length > 90 %}…{% endif %}</p>
+                    {% endif %}
+
+                    <div class="mt-auto">
+                        <p class="text-muted small mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-geo-alt-fill me-1" viewBox="0 0 16 16">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                            </svg>
+                            {{ p.suburb or p.location }}
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-people-fill me-1" viewBox="0 0 16 16">
+                                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                            </svg>
+                            {{ p.num_children }} child{{ 'ren' if p.num_children != 1 else '' }}
+                        </p>
+                    </div>
+
+                </div>
+                <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-2">
+                    <span class="btn btn-outline-sage btn-sm w-100 view-profile-btn">View Profile</span>
+                </div>
             </div>
-        </div>
+        </a>
+        {% endif %}
+
     </div>
     {% endfor %}
 </div>
@@ -196,6 +231,8 @@
 <script>
 window._sitbuddyProfiles = {{ profiles | tojson }};
 window._sitbuddyMode     = {{ mode | tojson }};
+window._userLat = {{ current_user.latitude | tojson }};
+window._userLng = {{ current_user.longitude | tojson }};
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endif %}

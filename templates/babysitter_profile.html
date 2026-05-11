@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ profile.user.name }} – SitBuddy{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-{% endblock %}
+{% block extra_head %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -91,16 +89,6 @@
                         </div>
                         {% endif %}
 
-                        <!-- Location map -->
-                        {% if profile.user.latitude and profile.user.longitude %}
-                        <div class="mb-3">
-                            <p class="fw-semibold mb-2">Location</p>
-                            <div id="profile-map"
-                                 data-lat="{{ profile.user.latitude }}"
-                                 data-lng="{{ profile.user.longitude }}"
-                                 style="height:200px;border-radius:8px;overflow:hidden;"></div>
-                        </div>
-                        {% endif %}
 
                         <!-- Actions -->
                         <div class="d-flex gap-2 mt-4">
@@ -179,10 +167,6 @@
 {% endblock %}
 
 {% block scripts %}
-{% if profile.user.latitude and profile.user.longitude %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{{ url_for('static', filename='js/profile-map.js') }}"></script>
-{% endif %}
 {% if is_own %}
 <script src="{{ url_for('static', filename='js/profiles.js') }}"></script>
 {% endif %}

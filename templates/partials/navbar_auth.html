@@ -43,14 +43,14 @@
                         {% if current_user.is_parent and current_user.parent_profile %}
                         <li>
                             <a class="dropdown-item" href="{{ url_for('main.parent_profile', profile_id=current_user.parent_profile.id) }}">
-                                Parent Profile
+                                View Profile
                             </a>
                         </li>
                         {% endif %}
                         {% if current_user.is_babysitter and current_user.babysitter_profile %}
                         <li>
                             <a class="dropdown-item" href="{{ url_for('main.babysitter_profile', profile_id=current_user.babysitter_profile.id) }}">
-                                Babysitter Profile
+                                View Profile
                             </a>
                         </li>
                         {% endif %}
