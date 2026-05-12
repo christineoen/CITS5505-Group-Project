@@ -685,6 +685,25 @@ a:hover {
     color: var(--sage) !important;
 }
 
+/* Navbar unread message badge */
+.navbar-unread-badge {
+    position: absolute;
+    top: -2px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    z-index: 10;
+}
+
 /* ── Navigation Responsive ── */
 @media (max-width: 991px) {
     .navbar-collapse .d-flex {
@@ -1335,26 +1354,6 @@ a:hover {
     font-size: 0.9rem;
     max-width: 300px;
     margin: 0 auto;
-}
-
-/* Role indicators */
-.role-indicator {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-}
-
-.role-indicator.parent {
-    background-color: #e3f2fd;
-    color: #1565c0;
-}
-
-.role-indicator.babysitter {
-    background-color: #f3e5f5;
-    color: #7b1fa2;
 }
 
 /* Responsive design */

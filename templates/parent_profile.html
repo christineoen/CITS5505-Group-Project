@@ -135,9 +135,11 @@
                         {% endif %}
 
                         {% if current_user.is_babysitter %}
+                        {% if has_booking %}
                         <div class="d-flex gap-2 mt-4">
-                            <a href="{{ url_for('messages.index') }}" class="btn btn-primary flex-fill">Message</a>
+                            <a href="{{ url_for('messages.index') }}?user_id={{ profile.user.id }}" class="btn btn-primary flex-fill">Message</a>
                         </div>
+                        {% endif %}
                         {% endif %}
                     </div>
 

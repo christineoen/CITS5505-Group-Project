@@ -291,6 +291,30 @@ def messages():
     return redirect(url_for("messages.index"))
 
 
+@main_bp.route("/api/pending-bookings-count")
+@login_required
+def pending_bookings_count():
+    """API endpoint to get pending bookings count for current user"""
+    from flask import jsonify
+    
+    count = 0
+    
+    if current_user.is_parent and current_user.parent_profile:
+        # Parents see their sent pending requests
+        count = Booking.query.filter_by(
+            parent_id=current_user.parent_profile.id,
+            status="pending"
+        ).count()
+    elif current_user.is_babysitter and current_user.babysitter_profile:
+        # Babysitters see received pending requests
+        count = Booking.query.filter_by(
+            babysitter_id=current_user.babysitter_profile.id,
+            status="pending"
+        ).count()
+    
+    return jsonify({"count": count})
+
+
 @main_bp.route("/babysitter/<int:profile_id>")
 @login_required
 def babysitter_profile(profile_id):
@@ -298,6 +322,15 @@ def babysitter_profile(profile_id):
     import json
     days = json.loads(profile.availability) if profile.availability else []
     is_own = current_user.is_babysitter and current_user.babysitter_profile.id == profile_id
+    
+    # Check if current user has any bookings with this babysitter
+    has_booking = False
+    if current_user.is_parent and current_user.parent_profile:
+        has_booking = Booking.query.filter_by(
+            parent_id=current_user.parent_profile.id,
+            babysitter_id=profile_id
+        ).first() is not None
+    
     average_rating = profile.get_average_rating()
     rating_count = profile.get_rating_count()
     # Fetch all ratings received by this babysitter
@@ -305,7 +338,8 @@ def babysitter_profile(profile_id):
     reviews = Rating.query.filter_by(ratee_id=profile.user_id)\
                           .order_by(Rating.created_at.desc()).all()
     return render_template("babysitter_profile.html", profile=profile, days=days, is_own=is_own,
-                           average_rating=average_rating, rating_count=rating_count, reviews=reviews)
+                           average_rating=average_rating, rating_count=rating_count, reviews=reviews,
+                           has_booking=has_booking)
 
 
 @main_bp.route("/babysitter/<int:profile_id>/edit", methods=["POST"])
@@ -361,13 +395,23 @@ def babysitter_profile_edit(profile_id):
 def parent_profile(profile_id):
     profile = ParentProfile.query.get_or_404(profile_id)
     is_own = current_user.is_parent and current_user.parent_profile.id == profile_id
+    
+    # Check if current user has any bookings with this parent
+    has_booking = False
+    if current_user.is_babysitter and current_user.babysitter_profile:
+        has_booking = Booking.query.filter_by(
+            parent_id=profile_id,
+            babysitter_id=current_user.babysitter_profile.id
+        ).first() is not None
+    
     average_rating = profile.get_average_rating()
     rating_count = profile.get_rating_count()
     from models.rating import Rating
     reviews = Rating.query.filter_by(ratee_id=profile.user_id)\
                           .order_by(Rating.created_at.desc()).all()
     return render_template("parent_profile.html", profile=profile, is_own=is_own,
-                           average_rating=average_rating, rating_count=rating_count, reviews=reviews)
+                           average_rating=average_rating, rating_count=rating_count, reviews=reviews,
+                           has_booking=has_booking)
 
 
 @main_bp.route("/parent/<int:profile_id>/edit", methods=["POST"])
