@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from models import db
 
 
@@ -19,6 +19,11 @@ class Booking(db.Model):
     parent = db.relationship("ParentProfile", backref="bookings")
     babysitter = db.relationship("BabysitterProfile", backref="bookings")
     messages = db.relationship("Message", back_populates="booking", cascade="all, delete-orphan")
+
+    @property
+    def end_time(self):
+        start_dt = datetime.combine(self.date, self.start_time)
+        return (start_dt + timedelta(hours=self.duration_hours)).time()
 
     def __repr__(self):
         return f"<Booking {self.id} parent={self.parent_id} babysitter={self.babysitter_id} status={self.status}>"

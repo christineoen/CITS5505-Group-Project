@@ -38,6 +38,7 @@ BOOKING_PAIRS = [
     ("alice@example.com",  "ava@example.com",    -8, 11, 3, "pending",   ""),
     ("henry@example.com",  "ethan@example.com",  12, 10, 4, "completed", "Dietary restrictions - no gluten."),
     ("henry@example.com",  "oliver@example.com", -9, 15, 3, "pending",   ""),
+    ("sarah@example.com",  "emma@example.com",    2, 17, 3, "completed", "Kids had a great evening."),
 ]
 
 # Ratings for each completed booking: (parent_comment, parent_score, babysitter_comment, babysitter_score)
@@ -145,6 +146,7 @@ def seed_bookings_and_messages():
                     date=booking_date.strftime("%A, %d %B"),
                     start_time=booking_start.strftime("%H:%M"),
                 )
+                is_last = i == len(msg_templates) - 1
                 existing_msg = Message.query.filter_by(
                     booking_id=booking.id,
                     sender_id=sender.id,
@@ -156,6 +158,7 @@ def seed_bookings_and_messages():
                         sender_id=sender.id,
                         content=content,
                         created_at=base_time + timedelta(hours=i),
+                        is_read=not is_last,
                     ))
 
             # Ratings for completed bookings

@@ -1,3 +1,4 @@
+from datetime import time
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField, DateField, TimeField, IntegerField, TextAreaField, FloatField, SelectMultipleField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, NumberRange, Optional
@@ -61,10 +62,11 @@ class LoginForm(FlaskForm):
 
 class BookingForm(FlaskForm):
     date = DateField("Date", validators=[DataRequired()])
-    start_time = TimeField("Start Time", validators=[DataRequired()])
+    start_time = TimeField("Start Time", validators=[DataRequired()], default=time(18, 0))
     duration_hours = IntegerField(
         "Duration (hours)",
         validators=[DataRequired(), NumberRange(min=1, max=12, message="Duration must be between 1 and 12 hours.")],
+        default=4,
     )
     notes = TextAreaField("Notes (optional)", validators=[Optional(), Length(max=500)])
     submit = SubmitField("Request Booking")

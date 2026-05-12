@@ -70,8 +70,8 @@ def get_conversations():
                         "name": other_user.name
                     },
                     "booking_status": booking.status,
-                    "booking_date": booking.date.isoformat(),
-                    "booking_time": f"{booking.start_time.strftime('%H:%M')} - {end_datetime.strftime('%H:%M')}",
+                    "booking_date": booking.date.strftime('%a, %-d %b %Y'),
+                    "booking_time": f"{booking.start_time.strftime('%-I:%M %p')} - {end_datetime.strftime('%-I:%M %p')}",
                     "last_message": last_message.to_dict() if last_message else None,
                     "unread_count": unread_count
                 })
@@ -133,8 +133,8 @@ def get_conversation(booking_id):
             "booking": {
                 "id": booking.id,
                 "status": booking.status,
-                "date": booking.date.isoformat(),
-                "time": f"{booking.start_time.strftime('%H:%M')} - {end_datetime.strftime('%H:%M')}"
+                "date": booking.date.strftime('%a, %-d %b %Y'),
+                "time": f"{booking.start_time.strftime('%-I:%M %p')} - {end_datetime.strftime('%-I:%M %p')}"
             },
             "other_user": {
                 "id": other_user.id,

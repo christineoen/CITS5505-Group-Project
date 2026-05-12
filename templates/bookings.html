@@ -12,126 +12,108 @@
     {% endfor %}
 {% endwith %}
 
+{% macro profile_cell(user, profile_url, avatar_color='sage') %}
+<td>
+    <div class="d-flex align-items-center gap-2">
+        {% if user.photo_url %}
+        <img src="{{ url_for('static', filename=user.photo_url) }}"
+             alt="{{ user.name }}"
+             class="avatar-circle object-fit-cover flex-shrink-0"
+             style="width:36px;height:36px;">
+        {% else %}
+        <div class="avatar-circle bg-{{ avatar_color }} flex-shrink-0 d-flex align-items-center justify-content-center"
+             style="width:36px;height:36px;font-size:.85rem;">
+            {{ user.name[0].upper() }}
+        </div>
+        {% endif %}
+        <a href="{{ profile_url }}" class="fw-semibold text-dark" target="_blank">{{ user.name }}</a>
+    </div>
+</td>
+{% endmacro %}
+
 {% macro status_badge(status) %}
     {% if status == 'pending' %}
         <span class="badge bg-warning text-dark">Pending</span>
     {% elif status == 'accepted' %}
-        <span class="badge bg-success">Accepted</span>
+        <span class="badge bg-sage text-dark">Accepted</span>
     {% elif status == 'rejected' %}
         <span class="badge bg-danger">Rejected</span>
     {% elif status == 'cancelled' %}
-        <span class="badge bg-secondary">Cancelled</span>
+        <span class="badge bg-danger">Cancelled</span>
     {% elif status == 'completed' %}
-        <span class="badge bg-primary">Completed</span>
+        <span class="badge bg-soft-blue text-dark">Completed</span>
     {% endif %}
 {% endmacro %}
 
 {# ── PARENT VIEW ── #}
 {% if current_user.is_parent %}
-<h2 class="fw-bold mb-4">My Booking Requests</h2>
+<h2 class="fw-bold mb-4">Your Bookings</h2>
 
-{% set sections = [
-    ('pending',   'Pending',   'warning'),
-    ('accepted',  'Accepted',  'success'),
-    ('completed', 'Completed', 'primary'),
-    ('rejected',  'Rejected',  'danger'),
-    ('cancelled', 'Cancelled', 'secondary'),
-] %}
-
-{% for key, label, color in sections %}
-{% set items = parent_bookings[key] %}
-{% if items %}
-<h5 class="fw-semibold text-{{ color }} mb-3 mt-4">{{ label }}</h5>
-<div class="row g-3 mb-2">
-    {% for b in items %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="fw-semibold mb-0">{{ b.babysitter.user.name }}</h6>
-                    {{ status_badge(b.status) }}
-                </div>
-
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-calendar3 me-1"></i>{{ b.date.strftime('%d %b %Y') }}
-                </p>
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-clock me-1"></i>{{ b.start_time.strftime('%H:%M') }} · {{ b.duration_hours }}h
-                </p>
-                {% if b.babysitter.hourly_rate %}
-                <p class="text-muted small mb-0">
-                    <i class="bi bi-currency-dollar me-1"></i>${{ "%.2f"|format(b.babysitter.hourly_rate) }}/hr
-                </p>
-                {% endif %}
-                {% if b.notes %}
-                <p class="text-muted small mb-0 mt-1">
-                    <i class="bi bi-chat-left-text me-1"></i>{{ b.notes[:100] }}{% if b.notes|length > 100 %}…{% endif %}
-                </p>
-                {% endif %}
-            </div>
-            {% set booking_started = (b.date, b.start_time) <= (now.date(), now.time()) %}
+{% if parent_bookings %}
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Babysitter</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Rate</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for b in parent_bookings %}
+    {% set booking_started = (b.date, b.start_time) <= (now.date(), now.time()) %}
+    <tr>
+        {{ profile_cell(b.babysitter.user, url_for('main.babysitter_profile', profile_id=b.babysitter.id), 'sage') }}
+        <td>{{ b.date.strftime('%a, %-d %b %Y') }}</td>
+        <td class="text-muted small">{{ b.start_time.strftime('%-I:%M %p') }} – {{ b.end_time.strftime('%-I:%M %p') }}</td>
+        <td>
+            {% if b.babysitter.hourly_rate %}
+            ${{ "%.0f"|format(b.babysitter.hourly_rate) }}/hr
+            {% else %}—{% endif %}
+        </td>
+        <td>{{ status_badge(b.status) }}</td>
+        <td class="text-end">
             {% if b.status == 'pending' %}
-            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
-                <form method="POST" action="{{ url_for('main.cancel_booking', booking_id=b.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm w-100"
-                            onclick="return confirm('Cancel this booking request?')">
-                        Cancel Request
-                    </button>
-                </form>
-            </div>
+            <form method="POST" action="{{ url_for('main.cancel_booking', booking_id=b.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm"
+                        onclick="return confirm('Cancel this booking request?')">Cancel</button>
+            </form>
             {% elif b.status == 'accepted' and booking_started %}
-            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
-                <form method="POST" action="{{ url_for('main.complete_booking', booking_id=b.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-primary btn-sm w-100"
-                            onclick="return confirm('Mark this booking as completed?')">
-                        <i class="bi bi-check-circle me-1"></i>Mark as Completed
-                    </button>
-                </form>
-            </div>
-            {% elif b.status == 'completed' %}
-            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
-                {% if b.id not in rated_booking_ids %}
-                <button type="button"
-                        class="btn btn-warning btn-sm w-100 fw-semibold"
-                        data-bs-toggle="modal"
-                        data-bs-target="#rateModal"
-                        data-booking-id="{{ b.id }}"
-                        data-ratee-name="{{ b.babysitter.user.name }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-star-fill me-1" viewBox="0 0 16 16">
-                        <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                    </svg>
-                    Rate {{ b.babysitter.user.name }}
+            <form method="POST" action="{{ url_for('main.complete_booking', booking_id=b.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary btn-sm"
+                        onclick="return confirm('Mark this booking as completed?')">
+                    <i class="bi bi-check-circle me-1"></i>Complete
                 </button>
-                {% else %}
-                <div class="text-center py-1">
-                    <span class="text-warning">
-                        {% set r = namespace(rating=none) %}
-                        {% for rating in b.ratings %}
-                            {% if rating.rater_id == current_user.id %}
-                                {% set r.rating = rating %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if r.rating %}
-                            {% for i in range(r.rating.score) %}★{% endfor %}{% for i in range(5 - r.rating.score) %}☆{% endfor %}
-                        {% endif %}
-                    </span>
-                    <small class="text-muted d-block">You rated this booking</small>
-                </div>
-                {% endif %}
-            </div>
+            </form>
+            {% elif b.status == 'completed' %}
+            {% if b.id not in rated_booking_ids %}
+            <button type="button" class="btn btn-warning btn-sm fw-semibold"
+                    data-bs-toggle="modal" data-bs-target="#rateModal"
+                    data-booking-id="{{ b.id }}"
+                    data-ratee-name="{{ b.babysitter.user.name }}">Leave a Review</button>
+            {% else %}
+            <span class="text-warning">
+                {% set r = namespace(rating=none) %}
+                {% for rating in b.ratings %}{% if rating.rater_id == current_user.id %}{% set r.rating = rating %}{% endif %}{% endfor %}
+                {% if r.rating %}{% for i in range(r.rating.score) %}★{% endfor %}{% for i in range(5 - r.rating.score) %}☆{% endfor %}{% endif %}
+            </span>
             {% endif %}
-        </div>
-    </div>
+            {% endif %}
+        </td>
+    </tr>
     {% endfor %}
+    </tbody>
+</table>
 </div>
-{% endif %}
-{% endfor %}
-
-{% if not (parent_bookings.pending or parent_bookings.accepted or parent_bookings.rejected or parent_bookings.cancelled or parent_bookings.completed) %}
+{% else %}
 <div class="text-center py-5 text-muted">
-    <p class="fs-5">You haven't made any booking requests yet.</p>
+    <p class="fs-5 fw-semibold text-dark mb-1">You don't have any bookings yet.</p>
+    <p class="mb-3">Search for trusted babysitters near you to get started.</p>
     <a href="{{ url_for('main.index') }}" class="btn btn-primary">Browse Babysitters</a>
 </div>
 {% endif %}
@@ -139,104 +121,72 @@
 
 {# ── BABYSITTER VIEW ── #}
 {% if current_user.is_babysitter %}
-<h2 class="fw-bold mb-4 {% if current_user.is_parent %}mt-5{% endif %}">Incoming Booking Requests</h2>
+<h2 class="fw-bold mb-4 {% if current_user.is_parent %}mt-5{% endif %}">Booking Requests</h2>
 
-{% set bs_sections = [
-    ('pending',   'Pending',   'warning'),
-    ('accepted',  'Accepted',  'success'),
-    ('completed', 'Completed', 'primary'),
-    ('rejected',  'Rejected',  'danger'),
-] %}
-
-{% for key, label, color in bs_sections %}
-{% set items = babysitter_bookings[key] %}
-{% if items %}
-<h5 class="fw-semibold text-{{ color }} mb-3 mt-4">{{ label }}</h5>
-<div class="row g-3 mb-2">
-    {% for b in items %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="fw-semibold mb-0">{{ b.parent.user.name }}</h6>
-                    {{ status_badge(b.status) }}
-                </div>
-                {# Parent info #}
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-people me-1"></i>
-                    {{ b.parent.children|length if b.parent.children else 0 }} child{{ 'ren' if (b.parent.children|length if b.parent.children else 0) != 1 else '' }}
-                </p>
-                {% if b.parent.user.suburb or b.parent.user.postcode %}
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-geo-alt me-1"></i>{{ b.parent.user.suburb or b.parent.user.postcode }}
-                </p>
-                {% endif %}
-                {% if b.parent.about %}
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-info-circle me-1"></i>{{ b.parent.about[:80] }}{% if b.parent.about|length > 80 %}…{% endif %}
-                </p>
-                {% endif %}
-                <hr class="my-2">
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-calendar3 me-1"></i>{{ b.date.strftime('%d %b %Y') }}
-                </p>
-                <p class="text-muted small mb-0">
-                    <i class="bi bi-clock me-1"></i>{{ b.start_time.strftime('%H:%M') }} · {{ b.duration_hours }}h
-                </p>
-            </div>
+{% if babysitter_bookings %}
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Parent</th>
+            <th>Children</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for b in babysitter_bookings %}
+    <tr>
+        {{ profile_cell(b.parent.user, url_for('main.parent_profile', profile_id=b.parent.id), 'dusty-rose') }}
+        <td class="small text-muted">
+            {% if b.parent.children %}
+            {% for child in b.parent.children %}{{ child.name or 'Child' }}{% if child.age %} ({{ child.age }}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+            {% else %}—{% endif %}
+        </td>
+        <td class="small text-muted">{{ b.parent.user.suburb or b.parent.user.postcode or '—' }}</td>
+        <td>{{ b.date.strftime('%a, %-d %b %Y') }}</td>
+        <td class="text-muted small">{{ b.start_time.strftime('%-I:%M %p') }} – {{ b.end_time.strftime('%-I:%M %p') }}</td>
+        <td>{{ status_badge(b.status) }}</td>
+        <td class="text-end">
             {% if b.status == 'pending' %}
-            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3 d-flex gap-2">
-                <form method="POST" action="{{ url_for('main.accept_booking', booking_id=b.id) }}" class="flex-fill">
+            <div class="d-flex gap-1 justify-content-end">
+                <form method="POST" action="{{ url_for('main.accept_booking', booking_id=b.id) }}" class="d-inline">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-success btn-sm w-100">Accept</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Accept</button>
                 </form>
-                <form method="POST" action="{{ url_for('main.reject_booking', booking_id=b.id) }}" class="flex-fill">
+                <form method="POST" action="{{ url_for('main.reject_booking', booking_id=b.id) }}" class="d-inline">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">Reject</button>
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Reject</button>
                 </form>
             </div>
             {% elif b.status == 'completed' %}
-            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
-                {% if b.id not in rated_booking_ids %}
-                <button type="button"
-                        class="btn btn-warning btn-sm w-100 fw-semibold"
-                        data-bs-toggle="modal"
-                        data-bs-target="#rateModal"
-                        data-booking-id="{{ b.id }}"
-                        data-ratee-name="{{ b.parent.user.name }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-star-fill me-1" viewBox="0 0 16 16">
-                        <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                    </svg>
-                    Rate {{ b.parent.user.name }}
-                </button>
-                {% else %}
-                <div class="text-center py-1">
-                    <span class="text-warning">
-                        {% set r = namespace(rating=none) %}
-                        {% for rating in b.ratings %}
-                            {% if rating.rater_id == current_user.id %}
-                                {% set r.rating = rating %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if r.rating %}
-                            {% for i in range(r.rating.score) %}★{% endfor %}{% for i in range(5 - r.rating.score) %}☆{% endfor %}
-                        {% endif %}
-                    </span>
-                    <small class="text-muted d-block">You rated this booking</small>
-                </div>
-                {% endif %}
-            </div>
+            {% if b.id not in rated_booking_ids %}
+            <button type="button" class="btn btn-warning btn-sm fw-semibold"
+                    data-bs-toggle="modal" data-bs-target="#rateModal"
+                    data-booking-id="{{ b.id }}"
+                    data-ratee-name="{{ b.parent.user.name }}">Leave a Review</button>
+            {% else %}
+            <span class="text-warning">
+                {% set r = namespace(rating=none) %}
+                {% for rating in b.ratings %}{% if rating.rater_id == current_user.id %}{% set r.rating = rating %}{% endif %}{% endfor %}
+                {% if r.rating %}{% for i in range(r.rating.score) %}★{% endfor %}{% for i in range(5 - r.rating.score) %}☆{% endfor %}{% endif %}
+            </span>
             {% endif %}
-        </div>
-    </div>
+            {% endif %}
+        </td>
+    </tr>
     {% endfor %}
+    </tbody>
+</table>
 </div>
-{% endif %}
-{% endfor %}
-
-{% if not (babysitter_bookings.pending or babysitter_bookings.accepted or babysitter_bookings.rejected or babysitter_bookings.completed) %}
+{% else %}
 <div class="text-center py-5 text-muted">
-    <p class="fs-5">No booking requests yet.</p>
+    <p class="fs-5 fw-semibold text-dark mb-1">No booking requests yet.</p>
+    <p class="mb-3">Make sure your profile is up to date so parents can find you.</p>
+    <a href="{{ url_for('main.babysitter_profile', profile_id=current_user.babysitter_profile.id) }}" class="btn btn-primary">View My Profile</a>
 </div>
 {% endif %}
 {% endif %}
@@ -247,8 +197,8 @@
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-0 pb-0 px-4 pt-4">
                 <div>
-                    <h5 class="modal-title fw-bold mb-1" id="rateModalLabel">Rate Your Experience</h5>
-                    <p class="text-muted small mb-0">Rating <span id="ratee-name-display" class="fw-semibold text-dark"></span></p>
+                    <h5 class="modal-title fw-bold mb-1" id="rateModalLabel">Leave a Review</h5>
+                    <p class="text-muted small mb-0">Reviewing <span id="ratee-name-display" class="fw-semibold text-dark"></span></p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -293,7 +243,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill me-1" viewBox="0 0 16 16">
                             <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
                         </svg>
-                        Submit Rating
+                        Submit Review
                     </button>
                 </div>
             </form>
