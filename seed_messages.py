@@ -146,6 +146,7 @@ def seed_bookings_and_messages():
                     date=booking_date.strftime("%A, %d %B"),
                     start_time=booking_start.strftime("%H:%M"),
                 )
+                is_last = i == len(msg_templates) - 1
                 existing_msg = Message.query.filter_by(
                     booking_id=booking.id,
                     sender_id=sender.id,
@@ -157,6 +158,7 @@ def seed_bookings_and_messages():
                         sender_id=sender.id,
                         content=content,
                         created_at=base_time + timedelta(hours=i),
+                        is_read=not is_last,
                     ))
 
             # Ratings for completed bookings

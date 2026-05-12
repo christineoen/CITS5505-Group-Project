@@ -114,8 +114,11 @@ async function loadConversations() {
                                 ${unreadBadge}
                             </div>
                             <div class="conversation-meta mb-2">
-                                <span class="status-badge ${statusClass}">${conv.booking_status}</span>
-                                <span class="ms-2">${conv.booking_date} ${conv.booking_time}</span>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="status-badge ${statusClass}">${conv.booking_status}</span>
+                                    <span>${conv.booking_date}</span>
+                                </div>
+                                <div>${conv.booking_time}</div>
                             </div>
                             <div class="conversation-preview">
                                 ${lastMsg ? escapeHtml(lastMsg.content) : 'No messages yet'}
@@ -264,11 +267,9 @@ function setupRoleSpecificUI(data) {
             // Enable/disable buttons based on current state
             const acceptBtn = document.getElementById('accept-btn');
             const rejectBtn = document.getElementById('reject-btn');
-            const pendingBtn = document.getElementById('pending-btn');
-            
+
             acceptBtn.disabled = false;
             rejectBtn.disabled = false;
-            pendingBtn.disabled = false;
         }
     }
 }
@@ -485,9 +486,6 @@ async function performStatusUpdate(status) {
         // Update current booking status
         currentBookingStatus = status;
         
-        // Show success message
-        showSuccessMessage(`Booking ${status} successfully!`);
-        
         // Update UI to show only the selected action
         updateButtonsAfterStatusChange(status);
         
@@ -520,22 +518,8 @@ async function performStatusUpdate(status) {
 function updateButtonsAfterStatusChange(newStatus) {
     const babysitterActions = document.getElementById('babysitter-actions');
     
-    if (newStatus === 'accepted') {
-        // Show only accepted state
-        babysitterActions.innerHTML = `
-            <div class="alert alert-success mb-0">
-                <strong>✅ Booking Accepted</strong><br>
-                You have accepted this booking request. The parent has been notified.
-            </div>
-        `;
-    } else if (newStatus === 'rejected') {
-        // Show only rejected state
-        babysitterActions.innerHTML = `
-            <div class="alert alert-danger mb-0">
-                <strong>❌ Booking Rejected</strong><br>
-                You have declined this booking request. The parent has been notified.
-            </div>
-        `;
+    if (newStatus === 'accepted' || newStatus === 'rejected') {
+        babysitterActions.classList.add('d-none');
     }
     
     // Update the status badge in the header
@@ -544,19 +528,6 @@ function updateButtonsAfterStatusChange(newStatus) {
         statusBadge.textContent = newStatus.toUpperCase();
         statusBadge.className = `status-badge ${getStatusClass(newStatus)}`;
     }
-}
-
-// Keep pending function (new feature)
-function keepPending() {
-    showSuccessMessage('Booking kept as pending. You can decide later.');
-    
-    // Hide action buttons temporarily
-    document.getElementById('babysitter-actions').classList.add('d-none');
-    
-    // Show them again after 3 seconds
-    setTimeout(() => {
-        document.getElementById('babysitter-actions').classList.remove('d-none');
-    }, 3000);
 }
 
 // Utility functions
