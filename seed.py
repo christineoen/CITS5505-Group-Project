@@ -3,7 +3,18 @@ from models import db
 from models.user import User
 from models.babysitter_profile import BabysitterProfile
 from models.parent_profile import ParentProfile
-from utils import POSTCODE_COORDS
+POSTCODE_COORDS = {
+    "6003": (-31.9437, 115.8596),
+    "6007": (-31.9277, 115.8476),
+    "6008": (-31.9490, 115.8270),
+    "6009": (-31.9829, 115.8012),
+    "6010": (-31.9826, 115.7795),
+    "6011": (-31.9966, 115.7522),
+    "6014": (-31.9391, 115.7869),
+    "6050": (-31.9247, 115.8736),
+    "6102": (-31.9769, 115.8913),
+    "6160": (-32.0569, 115.7439),
+}
 from seed_messages import seed_bookings_and_messages
 
 BABYSITTERS = [

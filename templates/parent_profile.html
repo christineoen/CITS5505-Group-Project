@@ -223,6 +223,9 @@
                                 style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
                             <input type="hidden" id="suburb" name="suburb" value="{{ profile.user.suburb or '' }}">
                             <input type="hidden" id="postcode" name="postcode" value="{{ profile.user.postcode or '' }}">
+                            <input type="hidden" id="lat" name="lat" value="{{ profile.user.latitude or '' }}">
+                            <input type="hidden" id="lon" name="lon" value="{{ profile.user.longitude or '' }}">
+                            <div id="location-feedback" class="form-text mt-1"></div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">

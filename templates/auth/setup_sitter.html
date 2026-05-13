@@ -34,6 +34,9 @@
                             style="z-index:1000; display:none; max-height:220px; overflow-y:auto; top:100%;"></ul>
                         {{ form.suburb(id="suburb", type="hidden") }}
                         {{ form.postcode(id="postcode", type="hidden") }}
+                        <input type="hidden" id="lat" name="lat">
+                        <input type="hidden" id="lon" name="lon">
+                        <div id="location-feedback" class="form-text mt-1"></div>
                     </div>
 
                     <div class="mb-3">
