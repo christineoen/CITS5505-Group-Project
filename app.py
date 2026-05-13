@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from models import db
 from models.user import User
+from utils import fmt_date, fmt_time
 
 csrf = CSRFProtect()
 
@@ -34,6 +35,9 @@ def create_app(test_config=None):
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(User, int(user_id))
+
+    app.jinja_env.filters['datefmt'] = fmt_date
+    app.jinja_env.filters['timefmt'] = fmt_time
 
     from routes.main import main_bp
     from routes.auth import auth_bp
