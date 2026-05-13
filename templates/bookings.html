@@ -67,8 +67,10 @@
     {% set booking_started = (b.date, b.start_time) <= (now.date(), now.time()) %}
     <tr>
         {{ profile_cell(b.babysitter.user, url_for('main.babysitter_profile', profile_id=b.babysitter.id), 'sage') }}
-        <td>{{ b.date.strftime('%a, %-d %b %Y') }}</td>
-        <td class="text-muted small">{{ b.start_time.strftime('%-I:%M %p') }} – {{ b.end_time.strftime('%-I:%M %p') }}</td>
+        <td>{{ b.date.strftime('%a, %d %b %Y') }}</td>
+        {% set end_hour = (b.start_time.hour * 60 + b.start_time.minute + b.duration_hours * 60) // 60 %}
+        {% set end_min = (b.start_time.hour * 60 + b.start_time.minute + b.duration_hours * 60) % 60 %}
+        <td class="text-muted small">{{ b.start_time.strftime('%H:%M') }} – {{ '%02d:%02d'|format(end_hour, end_min) }}</td>
         <td>
             {% if b.babysitter.hourly_rate %}
             ${{ "%.0f"|format(b.babysitter.hourly_rate) }}/hr
@@ -147,8 +149,10 @@
             {% else %}—{% endif %}
         </td>
         <td class="small text-muted">{{ b.parent.user.suburb or b.parent.user.postcode or '—' }}</td>
-        <td>{{ b.date.strftime('%a, %-d %b %Y') }}</td>
-        <td class="text-muted small">{{ b.start_time.strftime('%-I:%M %p') }} – {{ b.end_time.strftime('%-I:%M %p') }}</td>
+        <td>{{ b.date.strftime('%a, %d %b %Y') }}</td>
+        {% set end_hour = (b.start_time.hour * 60 + b.start_time.minute + b.duration_hours * 60) // 60 %}
+        {% set end_min = (b.start_time.hour * 60 + b.start_time.minute + b.duration_hours * 60) % 60 %}
+        <td class="text-muted small">{{ b.start_time.strftime('%H:%M') }} – {{ '%02d:%02d'|format(end_hour, end_min) }}</td>
         <td>{{ status_badge(b.status) }}</td>
         <td class="text-end">
             {% if b.status == 'pending' %}

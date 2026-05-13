@@ -206,7 +206,6 @@ def rate_booking(booking_id):
 @main_bp.route("/bookings/<int:booking_id>/complete", methods=["POST"])
 @login_required
 def complete_booking(booking_id):
-    from datetime import datetime as dt
     b = Booking.query.get_or_404(booking_id)
     if not current_user.is_parent or b.parent_id != current_user.parent_profile.id:
         abort(403)
@@ -214,8 +213,8 @@ def complete_booking(booking_id):
         flash("Only accepted bookings can be marked as completed.", "warning")
         return redirect(url_for("main.bookings"))
     # Booking start must have already begun
-    booking_start = dt.combine(b.date, b.start_time)
-    if dt.now() < booking_start:
+    booking_start = datetime.combine(b.date, b.start_time)
+    if datetime.now() < booking_start:
         flash("You can only complete a booking after it has started.", "warning")
         return redirect(url_for("main.bookings"))
     b.status = "completed"
