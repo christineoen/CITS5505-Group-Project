@@ -8,6 +8,7 @@ from models.booking import Booking
 from models.message import Message
 from models.user import User
 from datetime import datetime, timezone
+from utils import fmt_date, fmt_time
 import logging
 
 # Configure logging
@@ -70,8 +71,8 @@ def get_conversations():
                         "name": other_user.name
                     },
                     "booking_status": booking.status,
-                    "booking_date": booking.date.strftime('%a, %-d %b %Y'),
-                    "booking_time": f"{booking.start_time.strftime('%-I:%M %p')} - {end_datetime.strftime('%-I:%M %p')}",
+                    "booking_date": fmt_date(booking.date),
+                    "booking_time": f"{fmt_time(booking.start_time)} - {fmt_time(end_datetime)}",
                     "last_message": last_message.to_dict() if last_message else None,
                     "unread_count": unread_count
                 })
@@ -133,8 +134,8 @@ def get_conversation(booking_id):
             "booking": {
                 "id": booking.id,
                 "status": booking.status,
-                "date": booking.date.strftime('%a, %-d %b %Y'),
-                "time": f"{booking.start_time.strftime('%-I:%M %p')} - {end_datetime.strftime('%-I:%M %p')}"
+                "date": fmt_date(booking.date),
+                "time": f"{fmt_time(booking.start_time)} - {fmt_time(end_datetime)}"
             },
             "other_user": {
                 "id": other_user.id,
