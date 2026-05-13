@@ -20,7 +20,8 @@ SitBuddy connects parents with qualified babysitters in Perth, Australia. Parent
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+), Bootstrap 5
 - **Authentication**: Flask-Login
 - **Security**: Flask-WTF CSRF protection
-- **Maps**: Leaflet.js
+- **Maps**: Leaflet.js with OpenStreetMap tiles
+- **Geocoding**: Nominatim (OpenStreetMap) — postcode and suburb lookup
 
 ---
 
@@ -114,10 +115,21 @@ SitBuddy/
 │   ├── main.py
 │   └── messages.py
 ├── templates/
-└── static/
-    ├── css/
-    ├── js/
-    └── images/
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── tests/
+│   ├── conftest.py          # Shared pytest fixtures
+│   ├── test_auth.py         # Auth routes and postcode lookup
+│   ├── test_home.py         # Homepage and listing
+│   ├── test_bookings.py     # Booking creation and state transitions
+│   ├── test_messages.py     # Messaging API
+│   ├── test_profiles.py     # Profile view and edit
+│   └── test_ratings.py      # Rating submission
+└── .github/
+    └── workflows/
+        └── test.yml         # CI: runs pytest on every push and PR
 ```
 
 ---
@@ -128,4 +140,4 @@ Developed as part of **CITS5505 Agile Web Development** at the **University of W
 
 This application acknowledges that its development takes place on Noongar land, and that Noongar people remain the spiritual and cultural custodians of their land.
 
-**Third-party resources**: Bootstrap 5, Leaflet.js, Google Fonts (Inter, Playfair Display), Flask-SQLAlchemy, Flask-Login, Flask-WTF
+**Third-party resources**: Bootstrap 5, Leaflet.js, OpenStreetMap (map tiles), Nominatim (geocoding API), Google Fonts (Inter, Playfair Display), Flask-SQLAlchemy, Flask-Login, Flask-WTF, pytest
