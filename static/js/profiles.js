@@ -3,6 +3,9 @@ const searchInput    = document.getElementById('location-search');
 const dropdown       = document.getElementById('location-dropdown');
 const suburbHidden   = document.getElementById('suburb');
 const postcodeHidden = document.getElementById('postcode');
+const latHidden      = document.getElementById('lat');
+const lonHidden      = document.getElementById('lon');
+const locationFeedback = document.getElementById('location-feedback');
 
 let debounceTimer = null;
 let activeIndex   = -1;
@@ -25,12 +28,28 @@ function selectResult(r) {
     searchInput.value    = `${r.suburb} (${r.postcode})`;
     suburbHidden.value   = r.suburb;
     postcodeHidden.value = r.postcode;
+    if (latHidden) latHidden.value = r.lat || '';
+    if (lonHidden) lonHidden.value = r.lon || '';
     dropdown.style.display = 'none';
+    showLocationFeedback(r);
 }
 
 function clearSelection() {
     suburbHidden.value   = '';
     postcodeHidden.value = '';
+    if (latHidden) latHidden.value = '';
+    if (lonHidden) lonHidden.value = '';
+    if (locationFeedback) locationFeedback.innerHTML = '';
+}
+
+function showLocationFeedback(r) {
+    if (!locationFeedback) return;
+    const isWA = r.state === 'Western Australia';
+    let html = `<span class="text-success">&#10003; ${r.suburb}, ${r.state || 'Australia'}</span>`;
+    if (!isWA) {
+        html += `<br><span class="text-warning">&#9888; This service is currently focused on the Perth area. Availability may be limited in your location.</span>`;
+    }
+    locationFeedback.innerHTML = html;
 }
 
 async function searchPostcode(q) {

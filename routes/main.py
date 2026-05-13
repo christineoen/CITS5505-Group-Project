@@ -8,7 +8,7 @@ from models.parent_profile import ParentProfile
 from models.booking import Booking
 from forms import BookingForm, RatingForm
 import json
-from utils import POSTCODE_SUBURB, DAYS, geocode_suburb
+from utils import DAYS
 
 main_bp = Blueprint("main", __name__)
 
@@ -55,7 +55,6 @@ def index():
         mode=mode,
         profiles=profiles,
         locations=locations,
-        postcode_suburb=POSTCODE_SUBURB,
         days=DAYS,
     )
 
@@ -369,17 +368,16 @@ def babysitter_profile_edit(profile_id):
 
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
+    try:
+        lat = float(request.form.get("lat") or "")
+        lon = float(request.form.get("lon") or "")
+    except (ValueError, TypeError):
+        lat = lon = None
 
-    if postcode and postcode not in POSTCODE_SUBURB:
-        flash("Invalid postcode. Please choose from the supported suburbs.", "danger")
-        return redirect(url_for("main.babysitter_profile", profile_id=profile_id))
-
-    if suburb != current_user.suburb or postcode != current_user.postcode:
-        current_user.suburb = suburb
-        current_user.postcode = postcode
-        lat, lng = geocode_suburb(suburb, postcode)
-        current_user.latitude = lat
-        current_user.longitude = lng
+    current_user.suburb = suburb
+    current_user.postcode = postcode
+    current_user.latitude = lat
+    current_user.longitude = lon
 
     photo_url = _save_photo(request.files.get("photo"))
     if photo_url:
@@ -438,17 +436,16 @@ def parent_profile_edit(profile_id):
 
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
+    try:
+        lat = float(request.form.get("lat") or "")
+        lon = float(request.form.get("lon") or "")
+    except (ValueError, TypeError):
+        lat = lon = None
 
-    if postcode and postcode not in POSTCODE_SUBURB:
-        flash("Invalid postcode. Please choose from the supported suburbs.", "danger")
-        return redirect(url_for("main.parent_profile", profile_id=profile_id))
-
-    if suburb != current_user.suburb or postcode != current_user.postcode:
-        current_user.suburb = suburb
-        current_user.postcode = postcode
-        lat, lng = geocode_suburb(suburb, postcode)
-        current_user.latitude = lat
-        current_user.longitude = lng
+    current_user.suburb = suburb
+    current_user.postcode = postcode
+    current_user.latitude = lat
+    current_user.longitude = lon
 
     photo_url = _save_photo(request.files.get("photo"))
     if photo_url:

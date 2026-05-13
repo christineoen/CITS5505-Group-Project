@@ -1,4 +1,5 @@
 import json
+import re
 import urllib.request
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
@@ -8,7 +9,7 @@ from models.user import User
 from models.babysitter_profile import BabysitterProfile
 from models.parent_profile import ParentProfile
 from forms import RegistrationForm, LoginForm, ProfileDetailsForm
-from utils import DAYS, POSTCODE_SUBURB, geocode_suburb
+from utils import DAYS
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -55,11 +56,19 @@ def setup_profile_details():
 
     form = ProfileDetailsForm()
     if form.validate_on_submit():
+        postcode = form.postcode.data or None
+        if postcode and not re.match(r'^\d{4}$', postcode):
+            flash("Please enter a valid 4-digit postcode.", "danger")
+            template = "auth/setup_parent.html" if role == "parent" else "auth/setup_sitter.html"
+            return render_template(template, form=form, days=DAYS)
         current_user.suburb = form.suburb.data or None
-        current_user.postcode = form.postcode.data or None
-        lat, lng = geocode_suburb(form.suburb.data, form.postcode.data)
-        current_user.latitude = lat
-        current_user.longitude = lng
+        current_user.postcode = postcode
+        try:
+            current_user.latitude = float(request.form.get("lat") or "")
+            current_user.longitude = float(request.form.get("lon") or "")
+        except (ValueError, TypeError):
+            current_user.latitude = None
+            current_user.longitude = None
 
         if role == "parent":
             try:
@@ -98,44 +107,46 @@ def postcode_search():
 
     results = []
     seen = set()
-    q_lower = q.lower()
 
-    # Search local dict by postcode prefix or suburb name prefix
-    for postcode, suburb in POSTCODE_SUBURB.items():
-        if postcode.startswith(q) or suburb.lower().startswith(q_lower):
+    try:
+        if re.match(r'^\d{4}$', q):
+            url = (
+                f"https://nominatim.openstreetmap.org/search"
+                f"?postalcode={quote(q)}&country=au&format=json&addressdetails=1&limit=10"
+            )
+        else:
+            url = (
+                f"https://nominatim.openstreetmap.org/search"
+                f"?city={quote(q)}&country=au&format=json&addressdetails=1&limit=10"
+            )
+        req = urllib.request.Request(url, headers={"User-Agent": "SitBuddy/1.0"})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read())
+        for item in data:
+            addr = item.get("address", {})
+            postcode = addr.get("postcode", "")
+            suburb = (
+                addr.get("suburb")
+                or addr.get("city_district")
+                or addr.get("town")
+                or addr.get("village")
+                or addr.get("city")
+                or ""
+            )
+            if not postcode or not suburb:
+                continue
             key = (postcode, suburb)
             if key not in seen:
                 seen.add(key)
-                results.append({"suburb": suburb, "postcode": postcode})
-
-    if len(results) < 8:
-        try:
-            url = (
-                f"https://nominatim.openstreetmap.org/search"
-                f"?q={quote(q)}&countrycodes=au&format=json&addressdetails=1&limit=10"
-            )
-            req = urllib.request.Request(url, headers={"User-Agent": "SitBuddy/1.0"})
-            with urllib.request.urlopen(req, timeout=3) as resp:
-                data = json.loads(resp.read())
-            for item in data:
-                addr = item.get("address", {})
-                postcode = addr.get("postcode", "")
-                suburb = (
-                    addr.get("suburb")
-                    or addr.get("city_district")
-                    or addr.get("town")
-                    or addr.get("village")
-                    or addr.get("city")
-                    or ""
-                )
-                if not postcode or not suburb:
-                    continue
-                key = (postcode, suburb)
-                if key not in seen:
-                    seen.add(key)
-                    results.append({"suburb": suburb, "postcode": postcode})
-        except Exception:
-            pass
+                results.append({
+                    "suburb": suburb,
+                    "postcode": postcode,
+                    "state": addr.get("state", ""),
+                    "lat": float(item["lat"]),
+                    "lon": float(item["lon"]),
+                })
+    except Exception:
+        pass
 
     return jsonify(results[:8])
 
