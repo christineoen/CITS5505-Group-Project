@@ -247,3 +247,301 @@ def test_setup_profile_missing_coords_stores_null(auth_client):
     user = User.query.filter_by(email="test@test.com").first()
     assert user.latitude is None
     assert user.longitude is None
+
+
+# ---------------------------------------------------------------------------
+# Suburb address fallbacks (city_district / village / city)
+# ---------------------------------------------------------------------------
+
+def test_suburb_falls_back_to_city_district(client):
+    city_district_result = {
+        "lat": "-31.9", "lon": "115.8",
+        "address": {"city_district": "Kings Park", "postcode": "6005", "state": "Western Australia"},
+    }
+    with patch("urllib.request.urlopen", return_value=_urlopen_mock([city_district_result])):
+        resp = client.get("/auth/postcode-search?q=kings")
+
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["suburb"] == "Kings Park"
+
+
+def test_suburb_falls_back_to_village(client):
+    village_result = {
+        "lat": "-31.9", "lon": "115.8",
+        "address": {"village": "Gidgegannup", "postcode": "6083", "state": "Western Australia"},
+    }
+    with patch("urllib.request.urlopen", return_value=_urlopen_mock([village_result])):
+        resp = client.get("/auth/postcode-search?q=gidge")
+
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["suburb"] == "Gidgegannup"
+
+
+def test_suburb_falls_back_to_city(client):
+    city_result = {
+        "lat": "-31.95", "lon": "115.86",
+        "address": {"city": "Perth", "postcode": "6000", "state": "Western Australia"},
+    }
+    with patch("urllib.request.urlopen", return_value=_urlopen_mock([city_result])):
+        resp = client.get("/auth/postcode-search?q=perth")
+
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["suburb"] == "Perth"
+
+
+# ---------------------------------------------------------------------------
+# /auth/signup
+# ---------------------------------------------------------------------------
+
+def test_signup_get_returns_200(client):
+    resp = client.get("/auth/signup")
+    assert resp.status_code == 200
+
+
+def test_signup_creates_user_and_redirects(client):
+    resp = client.post("/auth/signup", data={
+        "name": "Alice",
+        "email": "alice@example.com",
+        "password": "Password1!",
+        "confirm_password": "Password1!",
+    }, follow_redirects=False)
+
+    assert resp.status_code == 302
+    user = User.query.filter_by(email="alice@example.com").first()
+    assert user is not None
+    assert user.name == "Alice"
+
+
+def test_signup_duplicate_email_shows_error(app, client):
+    from models import db
+    existing = User(name="Alice", email="alice@example.com")
+    existing.set_password("Password1!")
+    db.session.add(existing)
+    db.session.commit()
+
+    resp = client.post("/auth/signup", data={
+        "name": "Alice2",
+        "email": "alice@example.com",
+        "password": "Password1!",
+        "confirm_password": "Password1!",
+    }, follow_redirects=True)
+
+    assert b"already registered" in resp.data
+
+
+def test_signup_password_mismatch_shows_error(client):
+    resp = client.post("/auth/signup", data={
+        "name": "Bob",
+        "email": "bob@example.com",
+        "password": "Password1!",
+        "confirm_password": "Different1!",
+    }, follow_redirects=True)
+
+    assert User.query.filter_by(email="bob@example.com").first() is None
+    assert b"match" in resp.data.lower() or resp.status_code == 200
+
+
+def test_signup_authenticated_user_redirected(auth_client):
+    resp = auth_client.get("/auth/signup", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+# ---------------------------------------------------------------------------
+# /auth/login
+# ---------------------------------------------------------------------------
+
+def test_login_get_returns_200(client):
+    resp = client.get("/auth/login")
+    assert resp.status_code == 200
+
+
+def test_login_valid_credentials_redirects(client):
+    user = User(name="Test", email="login@test.com")
+    user.set_password("Password1!")
+    from models import db
+    db.session.add(user)
+    db.session.commit()
+
+    resp = client.post("/auth/login", data={
+        "email": "login@test.com",
+        "password": "Password1!",
+    }, follow_redirects=False)
+
+    assert resp.status_code == 302
+
+
+def test_login_wrong_password_shows_flash(client):
+    user = User(name="Test", email="wrong@test.com")
+    user.set_password("Password1!")
+    from models import db
+    db.session.add(user)
+    db.session.commit()
+
+    resp = client.post("/auth/login", data={
+        "email": "wrong@test.com",
+        "password": "WrongPass1!",
+    }, follow_redirects=True)
+
+    assert b"Invalid email or password" in resp.data
+
+
+def test_login_unknown_email_shows_flash(client):
+    resp = client.post("/auth/login", data={
+        "email": "nobody@test.com",
+        "password": "Password1!",
+    }, follow_redirects=True)
+
+    assert b"Invalid email or password" in resp.data
+
+
+def test_login_safe_next_param_redirects(client):
+    user = User(name="Test", email="next@test.com")
+    user.set_password("Password1!")
+    from models import db
+    db.session.add(user)
+    db.session.commit()
+
+    resp = client.post("/auth/login?next=/some-page", data={
+        "email": "next@test.com",
+        "password": "Password1!",
+    }, follow_redirects=False)
+
+    assert resp.status_code == 302
+    assert resp.location.endswith("/some-page")
+
+
+def test_login_external_next_param_ignored(client):
+    user = User(name="Test", email="ext@test.com")
+    user.set_password("Password1!")
+    from models import db
+    db.session.add(user)
+    db.session.commit()
+
+    resp = client.post("/auth/login?next=http://evil.com/steal", data={
+        "email": "ext@test.com",
+        "password": "Password1!",
+    }, follow_redirects=False)
+
+    assert resp.status_code == 302
+    assert "evil.com" not in resp.location
+
+
+def test_login_authenticated_user_redirected(auth_client):
+    resp = auth_client.get("/auth/login", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+# ---------------------------------------------------------------------------
+# /auth/logout
+# ---------------------------------------------------------------------------
+
+def test_logout_redirects_unauthenticated(client):
+    resp = client.get("/auth/logout", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+def test_logout_logs_out_user(auth_client):
+    resp = auth_client.get("/auth/logout", follow_redirects=False)
+    assert resp.status_code == 302
+    # After logout, /auth/logout should redirect to login (not just index)
+    follow = auth_client.get("/auth/logout", follow_redirects=False)
+    assert follow.status_code == 302
+
+
+# ---------------------------------------------------------------------------
+# /auth/setup-profile — role selection
+# ---------------------------------------------------------------------------
+
+def test_setup_profile_get_returns_200(auth_client):
+    resp = auth_client.get("/auth/setup-profile")
+    assert resp.status_code == 200
+
+
+def test_setup_profile_valid_role_sets_session(auth_client):
+    auth_client.post("/auth/setup-profile", data={"role": "parent"}, follow_redirects=False)
+
+    with auth_client.session_transaction() as sess:
+        assert sess.get("pending_role") == "parent"
+
+
+def test_setup_profile_invalid_role_ignored(auth_client):
+    auth_client.post("/auth/setup-profile", data={"role": "admin"}, follow_redirects=False)
+
+    with auth_client.session_transaction() as sess:
+        assert sess.get("pending_role") != "admin"
+
+
+def test_setup_profile_already_parent_redirects(parent_client):
+    resp = parent_client.get("/auth/setup-profile", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+def test_setup_profile_already_sitter_redirects(sitter_client):
+    resp = sitter_client.get("/auth/setup-profile", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+# ---------------------------------------------------------------------------
+# /auth/setup-profile/details — sitter profile creation
+# ---------------------------------------------------------------------------
+
+def test_setup_profile_no_pending_role_redirects(auth_client):
+    resp = auth_client.get("/auth/setup-profile/details", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+def test_setup_profile_creates_sitter_profile(auth_client):
+    from models.babysitter_profile import BabysitterProfile
+
+    with auth_client.session_transaction() as sess:
+        sess["pending_role"] = "sitter"
+
+    auth_client.post("/auth/setup-profile/details", data={
+        "suburb": "Subiaco",
+        "postcode": "6008",
+        "lat": "-31.9490",
+        "lon": "115.8270",
+        "bio": "Love kids",
+        "hourly_rate": "25.0",
+        "experience_years": "3",
+    })
+
+    user = User.query.filter_by(email="test@test.com").first()
+    assert user.babysitter_profile is not None
+    assert user.babysitter_profile.hourly_rate == pytest.approx(25.0)
+
+
+def test_setup_profile_invalid_children_json_defaults_to_empty(auth_client):
+    from models.parent_profile import ParentProfile
+
+    with auth_client.session_transaction() as sess:
+        sess["pending_role"] = "parent"
+
+    auth_client.post("/auth/setup-profile/details", data={
+        "suburb": "Nedlands",
+        "postcode": "6009",
+        "lat": "-31.9829",
+        "lon": "115.8012",
+        "children_json": "not valid json{{",
+    })
+
+    user = User.query.filter_by(email="test@test.com").first()
+    assert user.parent_profile is not None
+    assert user.parent_profile.children == []
+
+
+def test_setup_profile_clears_pending_role_on_success(auth_client):
+    with auth_client.session_transaction() as sess:
+        sess["pending_role"] = "parent"
+
+    auth_client.post("/auth/setup-profile/details", data={
+        "suburb": "Nedlands",
+        "postcode": "6009",
+        "children_json": "[]",
+    })
+
+    with auth_client.session_transaction() as sess:
+        assert "pending_role" not in sess
