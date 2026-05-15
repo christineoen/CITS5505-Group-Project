@@ -1,5 +1,5 @@
 from datetime import datetime, time as time_type
-import os, uuid
+import os, re, uuid
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import login_required, current_user
 from models import db
@@ -206,7 +206,6 @@ def rate_booking(booking_id):
 @main_bp.route("/bookings/<int:booking_id>/complete", methods=["POST"])
 @login_required
 def complete_booking(booking_id):
-    from datetime import datetime as dt
     b = Booking.query.get_or_404(booking_id)
     if not current_user.is_parent or b.parent_id != current_user.parent_profile.id:
         abort(403)
@@ -214,8 +213,8 @@ def complete_booking(booking_id):
         flash("Only accepted bookings can be marked as completed.", "warning")
         return redirect(url_for("main.bookings"))
     # Booking start must have already begun
-    booking_start = dt.combine(b.date, b.start_time)
-    if dt.now() < booking_start:
+    booking_start = datetime.combine(b.date, b.start_time)
+    if datetime.now() < booking_start:
         flash("You can only complete a booking after it has started.", "warning")
         return redirect(url_for("main.bookings"))
     b.status = "completed"
@@ -436,6 +435,10 @@ def parent_profile_edit(profile_id):
 
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
+    if postcode is not None:
+        if not re.match(r'^\d{4}$', postcode) or not (200 <= int(postcode) <= 7999):
+            flash("Please enter a valid Australian postcode.", "danger")
+            return redirect(url_for("main.parent_profile", profile_id=profile_id))
     try:
         lat = float(request.form.get("lat") or "")
         lon = float(request.form.get("lon") or "")

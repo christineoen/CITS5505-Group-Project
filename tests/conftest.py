@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, time, datetime, timedelta
 
 import pytest
 
@@ -8,6 +8,7 @@ from models.user import User
 from models.babysitter_profile import BabysitterProfile
 from models.booking import Booking
 from models.parent_profile import ParentProfile
+from models.rating import Rating
 
 
 @pytest.fixture
@@ -109,6 +110,38 @@ def booking(app, parent_user, sitter_user):
         start_time=time(18, 0),
         duration_hours=3,
         status="pending",
+    )
+    _db.session.add(b)
+    _db.session.commit()
+    return b
+
+
+@pytest.fixture
+def accepted_booking(app, parent_user, sitter_user):
+    """An accepted booking between parent_user and sitter_user (future date)."""
+    b = Booking(
+        parent_id=parent_user.parent_profile.id,
+        babysitter_id=sitter_user.babysitter_profile.id,
+        date=date(2026, 8, 1),
+        start_time=time(10, 0),
+        duration_hours=2,
+        status="accepted",
+    )
+    _db.session.add(b)
+    _db.session.commit()
+    return b
+
+
+@pytest.fixture
+def completed_booking(app, parent_user, sitter_user):
+    """A completed booking between parent_user and sitter_user (past date)."""
+    b = Booking(
+        parent_id=parent_user.parent_profile.id,
+        babysitter_id=sitter_user.babysitter_profile.id,
+        date=date(2026, 1, 1),
+        start_time=time(10, 0),
+        duration_hours=2,
+        status="completed",
     )
     _db.session.add(b)
     _db.session.commit()
