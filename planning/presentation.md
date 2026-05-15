@@ -15,7 +15,7 @@ Dongsheng:
 Make a booking for Emma Sits, showing dates in the past and unavailable days are not clickable.
 Log in as Emma Sits (emma@example.com)
 Look at booking page for Emma sits, accept one booking, reject another booking.
-Make a rating on the booking that's available to rate, look at parent profile to see your review show up.
+Make a rating on the booking that's available to rate (Sarah Parent), look at parent profile to see your review show up.
 
 Xin:
 Edit profile for Emma.
