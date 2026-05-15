@@ -1,10 +1,10 @@
 Presentation flow
 
-Kaylin:
+Kaylin OR Chrstine:
 Briefly explain project, show the logged out homepage (our "marketing landing page")
 
 Christine:
-Sign up as a parent looking for a babysitter. I will sign up as christine@example.com.
+Sign up as a parent looking for a babysitter. I will sign up as christine@example.com with password123.
 Show filters and map for finding babysitters.
 
 Xin:
