@@ -9,7 +9,7 @@ Show filters and map for finding babysitters.
 
 Xin:
 Show parent profile on newly signed up parent, edit profile to add a photo.
-Note that you can only edit your own profile, you can't edit other people's profiles.
+Go back to homepage, click into a profile to show that you can't edit other people's profiles.
 
 Dongsheng:
 Make a booking for Emma Sits.
@@ -18,7 +18,7 @@ Look at booking page for Emma sits, accept one booking, reject another booking.
 Make a rating on the booking that's available to rate, look at parent profile to see your review show up.
 
 Xin:
-(edit profile for Emma)
+Edit profile for Emma.
 
 Kaylin:
 Show messaging feature, noting that you can only send a message after making a booking. Could say messaging without a booking could be a paid feature to encourange upgrades.
