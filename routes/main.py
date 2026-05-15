@@ -1,5 +1,5 @@
 from datetime import datetime, time as time_type
-import os, uuid
+import os, re, uuid
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import login_required, current_user
 from models import db
@@ -435,6 +435,10 @@ def parent_profile_edit(profile_id):
 
     suburb = request.form.get("suburb", "").strip() or None
     postcode = request.form.get("postcode", "").strip() or None
+    if postcode is not None:
+        if not re.match(r'^\d{4}$', postcode) or not (200 <= int(postcode) <= 7999):
+            flash("Please enter a valid Australian postcode.", "danger")
+            return redirect(url_for("main.parent_profile", profile_id=profile_id))
     try:
         lat = float(request.form.get("lat") or "")
         lon = float(request.form.get("lon") or "")
